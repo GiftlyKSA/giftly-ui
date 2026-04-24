@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 *)",
+      "Bash(node *)",
+      "Bash(npx expo *)",
+      "Bash(npm install *)",
+      "Bash(xargs grep *)",
+      "Bash(npm show *)",
+      "Bash(npx patch-package *)",
+      "Bash(npm --version)",
+      "Bash(claude mcp *)",
+      "mcp__figma__figma_get_nodes",
+      "Bash(git init *)",
+      "Bash(git branch *)",
+      "Bash(git remote *)"
+    ]
+  }
+}
