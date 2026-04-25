@@ -2,14 +2,12 @@ import React, { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   KeyboardAvoidingView, Platform, ScrollView,
-  TextInput, I18nManager, Modal,
+  TextInput, Modal, TouchableWithoutFeedback, Keyboard,
 } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { ThemeColors, Spacing, Radius, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
-
-I18nManager.forceRTL(true);
 
 interface RegisterScreenProps {
   onRegister: () => void;
@@ -24,8 +22,9 @@ const MIN_DATE = new Date(1900, 0, 1);
 
 export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegister, onGoLogin }) => {
   const { C } = useTheme();
-  const { t } = useLanguage();
-  const styles = useMemo(() => createStyles(C), [C]);
+  const { t, lang } = useLanguage();
+  const isRTL = lang === 'ar';
+  const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -54,6 +53,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegister, onGo
   };
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <KeyboardAvoidingView
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -73,7 +73,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegister, onGo
             value={name}
             onChangeText={setName}
             placeholder={t.reg_name_ph}
-            textAlign="right"
+            textAlign={isRTL ? 'right' : 'left'}
             placeholderTextColor={C.gray500}
           />
         </View>
@@ -90,7 +90,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegister, onGo
               onChangeText={setPhone}
               placeholder="5xxxxxxxx"
               keyboardType="phone-pad"
-              textAlign="right"
+              textAlign={isRTL ? 'right' : 'left'}
               placeholderTextColor={C.gray500}
               maxLength={9}
             />
@@ -105,7 +105,7 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegister, onGo
             onChangeText={setEmail}
             placeholder="example@email.com"
             keyboardType="email-address"
-            textAlign="right"
+            textAlign={isRTL ? 'right' : 'left'}
             autoCapitalize="none"
             placeholderTextColor={C.gray500}
           />
@@ -158,12 +158,14 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegister, onGo
                   minimumDate={MIN_DATE}
                   onChange={handleIosChange}
                   style={styles.iosPicker}
-                  locale="ar"
+                  locale={lang}
                 />
               </View>
             </View>
           </Modal>
         )}
+
+        <View style={styles.spacer} />
 
         <View style={styles.termsRow}>
           <Text style={styles.termsText}>{t.reg_terms1}</Text>
@@ -186,26 +188,28 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegister, onGo
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 
-const createStyles = (C: ThemeColors) => StyleSheet.create({
+const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.white },
-  scroll: { padding: Spacing.xl, paddingTop: Spacing.xxxl },
+  scroll: { padding: Spacing.xl, paddingTop: Spacing.xxxl, flexGrow: 1 },
+  spacer: { flex: 1, minHeight: Spacing.xl },
   backBtn: { marginBottom: Spacing.base },
   backText: { fontSize: 22, color: C.primary },
   title: {
     fontFamily: Fonts.tajawal.extraBold,
     fontSize: FontSize.xxl,
     color: C.black,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     marginBottom: Spacing.xs,
   },
   subtitle: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
     color: C.textSecondary,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     marginBottom: Spacing.xl,
   },
   fieldWrap: { marginBottom: Spacing.base },
@@ -213,7 +217,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.base,
     color: C.black,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     marginBottom: Spacing.xs,
   },
   input: {
@@ -225,11 +229,11 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     color: C.black,
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     backgroundColor: C.white,
   },
   inputRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 2,
     borderColor: C.gray200,
@@ -244,13 +248,15 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     color: C.black,
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
   },
   prefix: {
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
-    borderRightWidth: 1,
+    borderRightWidth: isRTL ? 1 : 0,
     borderRightColor: C.gray200,
+    borderLeftWidth: isRTL ? 0 : 1,
+    borderLeftColor: C.gray200,
   },
   prefixText: {
     fontFamily: Fonts.inter.regular,
@@ -258,7 +264,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     color: C.textSecondary,
   },
   dateBtn: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 2,

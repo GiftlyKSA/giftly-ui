@@ -1,14 +1,12 @@
 import React, { useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, I18nManager,
+  TouchableOpacity,
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTopInset } from '../../hooks/useTopInset';
-
-I18nManager.forceRTL(true);
 
 interface OrderTrackingScreenProps {
   orderId?: string;
@@ -24,8 +22,9 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
   orderId = 'ORD-593821', onBack, onChat,
 }) => {
   const { C } = useTheme();
-  const { t } = useLanguage();
-  const styles = useMemo(() => createStyles(C), [C]);
+  const { t, lang } = useLanguage();
+  const isRTL = lang === 'ar';
+  const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
   const topPadding = useTopInset();
 
   const stages = t.track_stages.map((label, i) => ({
@@ -141,10 +140,10 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
   );
 };
 
-const createStyles = (C: ThemeColors) => StyleSheet.create({
+const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bgPage },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: C.white,
@@ -170,7 +169,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     marginBottom: Spacing.base,
   },
   orderIdRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: Spacing.base,
@@ -191,7 +190,10 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontSize: FontSize.sm,
     color: C.primary,
   },
-  orderMeta: { flexDirection: 'row-reverse', justifyContent: 'space-between' },
+  orderMeta: {
+    flexDirection: isRTL ? 'row-reverse' : 'row',
+    justifyContent: 'space-between',
+  },
   metaItem: { flex: 1, alignItems: 'center' },
   metaValue: {
     fontFamily: Fonts.tajawal.bold,
@@ -208,7 +210,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
   },
   metaDivider: { width: 1, backgroundColor: C.gray200 },
   giftPreview: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     backgroundColor: C.white,
     borderRadius: Radius.xl,
     padding: Spacing.base,
@@ -222,22 +224,22 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   giftEmoji: { fontSize: 36 },
-  giftInfo: { flex: 1, alignItems: 'flex-end' },
+  giftInfo: { flex: 1, alignItems: isRTL ? 'flex-end' : 'flex-start' },
   giftName: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.md,
     color: C.black,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     marginBottom: 4,
   },
   giftOccasion: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.sm,
     color: C.textSecondary,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     marginBottom: Spacing.sm,
   },
-  agentRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: 6 },
+  agentRow: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 6 },
   agentAvatar: {
     width: 24, height: 24, borderRadius: 12,
     backgroundColor: C.primaryLight,
@@ -263,19 +265,22 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.md,
     color: C.black,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     marginBottom: Spacing.base,
   },
   stageRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'flex-start',
     position: 'relative',
     paddingBottom: Spacing.base,
   },
   stageLine: {
     position: 'absolute',
-    right: 19, top: 36,
-    width: 2, height: '100%',
+    right: isRTL ? 19 : undefined,
+    left: isRTL ? undefined : 19,
+    top: 36,
+    width: 2,
+    height: '100%',
     backgroundColor: C.gray200,
   },
   stageLineDone: { backgroundColor: C.primary },
@@ -283,12 +288,13 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: C.gray100,
     alignItems: 'center', justifyContent: 'center',
-    marginLeft: Spacing.base,
+    marginLeft: isRTL ? Spacing.base : 0,
+    marginRight: isRTL ? 0 : Spacing.base,
   },
   stageDotDone: { backgroundColor: C.primaryLighter },
   stageDotActive: { backgroundColor: C.primary },
   stageDotText: { fontSize: 18 },
-  stageContent: { flex: 1, paddingTop: 8, alignItems: 'flex-end' },
+  stageContent: { flex: 1, paddingTop: 8, alignItems: isRTL ? 'flex-end' : 'flex-start' },
   stageLabel: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
@@ -326,7 +332,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     color: C.textSecondary,
     marginTop: 4,
   },
-  actions: { flexDirection: 'row-reverse', gap: Spacing.sm },
+  actions: { flexDirection: isRTL ? 'row-reverse' : 'row', gap: Spacing.sm },
   cancelBtn: {
     flex: 1,
     borderWidth: 2, borderColor: C.error,

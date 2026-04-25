@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Dimensions, TouchableOpacity,
   FlatList, Animated,
@@ -15,7 +15,8 @@ interface Props {
 }
 
 export default function OnboardingScreen({ onFinish }: Props) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const isRTL = lang === 'ar';
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatRef = useRef<FlatList>(null);
   const pulse = useRef(new Animated.Value(1)).current;
@@ -27,33 +28,46 @@ export default function OnboardingScreen({ onFinish }: Props) {
     { id: '3', title: t.ob_s3_title, subtitle: t.ob_s3_sub, emoji: '📦' },
   ];
 
-  const skipOpacity = useMemo(
-    () =>
-      scrollX.interpolate({
-        inputRange: [(LAST - 1) * width, LAST * width],
-        outputRange: [1, 0],
-        extrapolate: 'clamp',
-      }),
-    [],
-  );
+  const logicalToPhysical = (idx: number) => (isRTL ? LAST - idx : idx);
+  const physicalToLogical = (idx: number) => (isRTL ? LAST - idx : idx);
+  const renderedSlides = isRTL ? [...slides].reverse() : slides;
+  const initialPhysicalIndex = logicalToPhysical(0);
+
+  useEffect(() => {
+    setCurrentIndex(0);
+    flatRef.current?.scrollToOffset({ offset: initialPhysicalIndex * width, animated: false });
+    scrollX.setValue(initialPhysicalIndex * width);
+  }, [initialPhysicalIndex, scrollX]);
+
+  const skipOpacity = scrollX.interpolate({
+    inputRange: isRTL ? [0, width] : [(LAST - 1) * width, LAST * width],
+    outputRange: isRTL ? [0, 1] : [1, 0],
+    extrapolate: 'clamp',
+  });
 
   useEffect(() => {
     if (currentIndex === LAST) {
-      Animated.loop(
+      const loop = Animated.loop(
         Animated.sequence([
           Animated.timing(pulse, { toValue: 1.06, duration: 600, useNativeDriver: true }),
           Animated.timing(pulse, { toValue: 1, duration: 600, useNativeDriver: true }),
         ]),
-      ).start();
-    } else {
-      pulse.stopAnimation();
-      pulse.setValue(1);
+      );
+      loop.start();
+      return () => loop.stop();
     }
-  }, [currentIndex]);
+
+    pulse.stopAnimation();
+    pulse.setValue(1);
+  }, [currentIndex, pulse]);
 
   const goToIndex = (idx: number) => {
-    flatRef.current?.scrollToOffset({ offset: idx * width, animated: true });
-    setCurrentIndex(idx);
+    const next = Math.max(0, Math.min(idx, LAST));
+    flatRef.current?.scrollToOffset({
+      offset: logicalToPhysical(next) * width,
+      animated: true,
+    });
+    setCurrentIndex(next);
   };
 
   const handleNext = () => {
@@ -71,13 +85,14 @@ export default function OnboardingScreen({ onFinish }: Props) {
         </TouchableOpacity>
       </Animated.View>
 
-      {/* direction: 'ltr' ensures item[0] = leftmost = offset 0, works reliably in RTL apps */}
       <View style={styles.flatWrap}>
         <FlatList
           ref={flatRef}
-          data={slides}
+          data={renderedSlides}
           horizontal
           pagingEnabled
+          initialScrollIndex={initialPhysicalIndex}
+          getItemLayout={(_, index) => ({ length: width, offset: width * index, index })}
           showsHorizontalScrollIndicator={false}
           keyExtractor={item => item.id}
           onScroll={Animated.event(
@@ -86,11 +101,12 @@ export default function OnboardingScreen({ onFinish }: Props) {
           )}
           scrollEventThrottle={16}
           onMomentumScrollEnd={e => {
-            const idx = Math.round(e.nativeEvent.contentOffset.x / width);
-            setCurrentIndex(Math.max(0, Math.min(idx, LAST)));
+            const physical = Math.round(e.nativeEvent.contentOffset.x / width);
+            const logical = physicalToLogical(physical);
+            setCurrentIndex(Math.max(0, Math.min(logical, LAST)));
           }}
           renderItem={({ item }) => (
-            <View style={styles.slide}>
+            <View style={[styles.slide, { direction: isRTL ? 'rtl' : 'ltr' }]}>
               <View style={styles.emojiWrap}>
                 <Text style={styles.emoji}>{item.emoji}</Text>
               </View>
@@ -100,7 +116,7 @@ export default function OnboardingScreen({ onFinish }: Props) {
           )}
         />
 
-        <View style={styles.dots}>
+        <View style={[styles.dots, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           {slides.map((_, i) => (
             <TouchableOpacity key={i} onPress={() => goToIndex(i)}>
               <View style={[styles.dot, i === currentIndex && styles.dotActive]} />
@@ -130,14 +146,13 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   skip: { position: 'absolute', top: 55, left: 24, zIndex: 10 },
   skipText: { fontFamily: Fonts.tajawal.regular, fontSize: FontSize.base, color: 'rgba(255,255,255,0.7)' },
-  flatWrap: { flex: 1, direction: 'ltr' },
+  flatWrap: { flex: 1 },
   slide: {
     width,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 40,
     paddingTop: 80,
-    direction: 'rtl',
   },
   emojiWrap: {
     width: 160, height: 160, borderRadius: 80,

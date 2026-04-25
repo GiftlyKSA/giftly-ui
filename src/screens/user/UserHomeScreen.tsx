@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, FlatList, I18nManager,
+  TouchableOpacity, FlatList,
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
@@ -9,8 +9,6 @@ import { useLanguage } from '../../context/LanguageContext';
 import { AppHeader } from '../../components/AppHeader';
 import { OrderCard } from '../../components/OrderCard';
 import { BottomTabBar } from '../../components/BottomTabBar';
-
-I18nManager.forceRTL(true);
 
 interface UserHomeScreenProps {
   onOrderPress: (orderId: string) => void;
@@ -26,8 +24,9 @@ const ORDERS = [
 
 const GiftCard: React.FC<{ title: string; price: string; tag: string }> = ({ title, price, tag }) => {
   const { C } = useTheme();
-  const { t } = useLanguage();
-  const styles = useMemo(() => createGiftCardStyles(C), [C]);
+  const { t, lang } = useLanguage();
+  const isRTL = lang === 'ar';
+  const styles = useMemo(() => createGiftCardStyles(C, isRTL), [C, isRTL]);
   return (
     <View style={styles.card}>
       <View style={styles.img}>
@@ -42,12 +41,13 @@ const GiftCard: React.FC<{ title: string; price: string; tag: string }> = ({ tit
   );
 };
 
-const createGiftCardStyles = (C: ThemeColors) => StyleSheet.create({
+const createGiftCardStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   card: {
     width: 160,
     backgroundColor: C.white,
     borderRadius: Radius.xl,
-    marginLeft: Spacing.base,
+    marginLeft: isRTL ? Spacing.base : 0,
+    marginRight: isRTL ? 0 : Spacing.base,
     padding: Spacing.sm,
     ...Shadow.card,
   },
@@ -62,28 +62,29 @@ const createGiftCardStyles = (C: ThemeColors) => StyleSheet.create({
     backgroundColor: C.primaryLighter,
     borderRadius: Radius.sm,
     paddingHorizontal: 8, paddingVertical: 3,
-    alignSelf: 'flex-end', marginBottom: 4,
+    alignSelf: isRTL ? 'flex-end' : 'flex-start', marginBottom: 4,
   },
   tag: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.xs, color: C.primary },
   title: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.sm,
     color: C.black,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     marginBottom: 4,
   },
   price: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.base,
     color: C.primary,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
   },
 });
 
 export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, onTabPress }) => {
   const { C } = useTheme();
-  const { t } = useLanguage();
-  const styles = useMemo(() => createStyles(C), [C]);
+  const { t, lang } = useLanguage();
+  const isRTL = lang === 'ar';
+  const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
   const [activeDay, setActiveDay] = useState(0);
   const [activeTab, setActiveTab] = useState('home');
 
@@ -103,24 +104,24 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <TouchableOpacity><Text style={styles.seeAll}>{t.home_see_all}</Text></TouchableOpacity>
             <Text style={styles.sectionTitle}>{t.home_featured}</Text>
+            <TouchableOpacity><Text style={styles.seeAll}>{t.home_see_all}</Text></TouchableOpacity>
           </View>
           <FlatList
             horizontal
-            inverted
+            inverted={isRTL}
             data={t.gifts}
             renderItem={({ item }) => <GiftCard {...item} />}
             keyExtractor={(_, i) => i.toString()}
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingRight: Spacing.xl }}
+            contentContainerStyle={isRTL ? { paddingRight: Spacing.xl } : { paddingLeft: Spacing.xl }}
           />
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <TouchableOpacity><Text style={styles.seeAll}>{t.home_full_cal}</Text></TouchableOpacity>
             <Text style={styles.sectionTitle}>{t.home_upcoming}</Text>
+            <TouchableOpacity><Text style={styles.seeAll}>{t.home_full_cal}</Text></TouchableOpacity>
           </View>
           <View style={styles.weekRow}>
             {t.days.map((day, idx) => (
@@ -182,7 +183,7 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
   );
 };
 
-const createStyles = (C: ThemeColors) => StyleSheet.create({
+const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bgPage },
   scroll: { flex: 1 },
   heroSection: { paddingHorizontal: Spacing.xl, paddingVertical: Spacing.xl },
@@ -190,12 +191,12 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.xxxl,
     color: C.black,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     lineHeight: 36,
   },
   section: { marginBottom: Spacing.xl, paddingHorizontal: Spacing.xl },
   sectionHeader: {
-    flexDirection: 'row',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.base,
@@ -211,7 +212,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     color: C.primary,
   },
   weekRow: {
-    flexDirection: 'row',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     backgroundColor: C.gray100,
     borderRadius: Radius.xl,
@@ -238,7 +239,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
   },
   dayNumActive: { color: '#FFFFFF' },
   eventCard: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     backgroundColor: C.white,
     borderRadius: Radius.lg,
@@ -252,15 +253,16 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     width: 40, height: 40, borderRadius: Radius.md,
     backgroundColor: C.primaryLighter,
     alignItems: 'center', justifyContent: 'center',
-    marginLeft: Spacing.sm,
+    marginLeft: isRTL ? Spacing.sm : 0,
+    marginRight: isRTL ? 0 : Spacing.sm,
   },
   eventIcon: { fontSize: 20 },
-  eventContent: { flex: 1, alignItems: 'flex-end' },
+  eventContent: { flex: 1, alignItems: isRTL ? 'flex-end' : 'flex-start' },
   eventTitle: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.base,
     color: C.black,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
   },
   eventTimeRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
   eventDate: {
@@ -273,7 +275,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontSize: FontSize.xs,
     color: C.primary,
   },
-  eventLeft: { marginRight: Spacing.xs },
+  eventLeft: { marginRight: isRTL ? Spacing.xs : 0, marginLeft: isRTL ? 0 : Spacing.xs },
   prepBtn: {
     backgroundColor: C.primary,
     borderRadius: Radius.sm,
@@ -294,7 +296,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.md,
     color: C.primary,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     marginBottom: Spacing.base,
   },
 });

@@ -1,15 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, Modal,
-  TouchableOpacity, Switch, I18nManager,
+  TouchableOpacity, Switch,
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTopInset } from '../../hooks/useTopInset';
 import { Lang } from '../../i18n/strings';
-
-I18nManager.forceRTL(true);
 
 interface ProfileScreenProps {
   isAgent?: boolean;
@@ -20,10 +18,10 @@ interface ProfileScreenProps {
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, onBack, onLogout }) => {
   const { C, isDark, toggle } = useTheme();
   const { t, lang, setLanguage } = useLanguage();
-  const styles = useMemo(() => createStyles(C), [C]);
+  const isRTL = lang === 'ar';
+  const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
   const topPadding = useTopInset();
 
-  const [notifEnabled, setNotifEnabled] = useState(true);
   const [langModalVisible, setLangModalVisible] = useState(false);
 
   return (
@@ -81,17 +79,17 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, o
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t.profile_account}</Text>
           <View style={styles.card}>
-            <MenuItem C={C} icon="📧" label={t.profile_email} value="example@email.com" />
+            <MenuItem C={C} isRTL={isRTL} icon="📧" label={t.profile_email} value="example@email.com" />
             <View style={styles.divider} />
-            <MenuItem C={C} icon="🏠" label={t.profile_address} value="الرياض، السعودية" />
+            <MenuItem C={C} isRTL={isRTL} icon="🏠" label={t.profile_address} value="الرياض، السعودية" />
             <View style={styles.divider} />
-            <MenuItem C={C} icon="💳" label={t.profile_payment} />
+            <MenuItem C={C} isRTL={isRTL} icon="💳" label={t.profile_payment} />
             {isAgent && (
               <>
                 <View style={styles.divider} />
-                <MenuItem C={C} icon="📊" label={t.profile_report} />
+                <MenuItem C={C} isRTL={isRTL} icon="📊" label={t.profile_report} />
                 <View style={styles.divider} />
-                <MenuItem C={C} icon="🗓️" label={t.profile_schedule} />
+                <MenuItem C={C} isRTL={isRTL} icon="🗓️" label={t.profile_schedule} />
               </>
             )}
           </View>
@@ -101,37 +99,23 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, o
           <Text style={styles.sectionTitle}>{t.profile_prefs}</Text>
           <View style={styles.card}>
             <View style={styles.toggleItem}>
-              <Switch
-                value={notifEnabled}
-                onValueChange={setNotifEnabled}
-                trackColor={{ true: C.primary }}
-                thumbColor={C.white}
-              />
               <View style={styles.toggleText}>
-                <Text style={styles.menuLabel}>{t.profile_notif}</Text>
                 <View style={styles.menuIconWrap}>
-                  <Text style={styles.menuIcon}>🔔</Text>
+                  <Text style={styles.menuIcon}>🌙</Text>
                 </View>
+                <Text style={styles.menuLabel}>{t.profile_dark}</Text>
               </View>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.toggleItem}>
               <Switch
                 value={isDark}
                 onValueChange={toggle}
                 trackColor={{ true: C.primary }}
                 thumbColor={C.white}
               />
-              <View style={styles.toggleText}>
-                <Text style={styles.menuLabel}>{t.profile_dark}</Text>
-                <View style={styles.menuIconWrap}>
-                  <Text style={styles.menuIcon}>🌙</Text>
-                </View>
-              </View>
             </View>
             <View style={styles.divider} />
             <MenuItem
               C={C}
+              isRTL={isRTL}
               icon="🌐"
               label={t.profile_lang}
               value={lang === 'ar' ? t.lang_ar : t.lang_en}
@@ -143,19 +127,19 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, o
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t.profile_support}</Text>
           <View style={styles.card}>
-            <MenuItem C={C} icon="❓" label={t.profile_help} />
+            <MenuItem C={C} isRTL={isRTL} icon="❓" label={t.profile_help} />
             <View style={styles.divider} />
-            <MenuItem C={C} icon="📜" label={t.profile_terms} />
+            <MenuItem C={C} isRTL={isRTL} icon="📜" label={t.profile_terms} />
             <View style={styles.divider} />
-            <MenuItem C={C} icon="🔒" label={t.profile_privacy} />
+            <MenuItem C={C} isRTL={isRTL} icon="🔒" label={t.profile_privacy} />
           </View>
         </View>
 
         <View style={styles.section}>
           <View style={styles.card}>
-            <MenuItem C={C} icon="🚪" label={t.profile_logout} onPress={onLogout} danger />
+            <MenuItem C={C} isRTL={isRTL} icon="🚪" label={t.profile_logout} onPress={onLogout} danger />
             <View style={styles.divider} />
-            <MenuItem C={C} icon="🗑️" label={t.profile_delete} danger />
+            <MenuItem C={C} isRTL={isRTL} icon="🗑️" label={t.profile_delete} danger />
           </View>
         </View>
 
@@ -206,24 +190,25 @@ const MenuItem: React.FC<{
   onPress?: () => void;
   value?: string;
   danger?: boolean;
-}> = ({ C, icon, label, onPress, value, danger = false }) => {
-  const styles = useMemo(() => createStyles(C), [C]);
+  isRTL: boolean;
+}> = ({ C, icon, label, onPress, value, danger = false, isRTL }) => {
+  const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
   return (
     <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={0.7}>
-      <Text style={[styles.menuArrow, danger && { color: C.error }]}>‹</Text>
-      {value && <Text style={styles.menuValue}>{value}</Text>}
-      <Text style={[styles.menuLabel, danger && { color: C.error }]}>{label}</Text>
       <View style={[styles.menuIconWrap, danger && { backgroundColor: 'rgba(219,13,13,0.1)' }]}>
         <Text style={styles.menuIcon}>{icon}</Text>
       </View>
+      <Text style={[styles.menuLabel, danger && { color: C.error }]}>{label}</Text>
+      {value && <Text style={styles.menuValue}>{value}</Text>}
+      <Text style={[styles.menuArrow, danger && { color: C.error }]}>‹</Text>
     </TouchableOpacity>
   );
 };
 
-const createStyles = (C: ThemeColors) => StyleSheet.create({
+const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bgPage },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: C.white,
@@ -283,7 +268,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
   ratingStars: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.base, color: '#FFB800' },
   ratingCount: { fontFamily: Fonts.tajawal.regular, fontSize: FontSize.base, color: C.textSecondary },
   statsRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     backgroundColor: C.gray100,
     borderRadius: Radius.xl,
     paddingVertical: Spacing.base,
@@ -304,7 +289,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.base,
     color: C.textSecondary,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     marginBottom: Spacing.sm,
   },
   card: {
@@ -314,7 +299,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     ...Shadow.card,
   },
   menuItem: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     padding: Spacing.base,
     gap: Spacing.sm,
@@ -330,24 +315,29 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
     color: C.black,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
   },
   menuValue: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.sm,
     color: C.textSecondary,
   },
-  menuArrow: { fontSize: 20, color: C.gray400, fontWeight: '300' },
+  menuArrow: {
+    fontSize: 20,
+    color: C.gray400,
+    fontWeight: '300',
+    transform: [{ rotate: isRTL ? '0deg' : '180deg' }],
+  },
   divider: { height: 1, backgroundColor: C.gray100, marginHorizontal: Spacing.base },
   toggleItem: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     padding: Spacing.base,
-    gap: Spacing.sm,
   },
   toggleText: {
     flex: 1,
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     gap: Spacing.sm,
   },
@@ -380,7 +370,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     marginBottom: Spacing.base,
   },
   langOption: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: Spacing.md,

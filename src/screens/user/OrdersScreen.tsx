@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, FlatList,
-  TouchableOpacity, I18nManager,
+  TouchableOpacity,
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
@@ -9,8 +9,6 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useTopInset } from '../../hooks/useTopInset';
 import { OrderCard } from '../../components/OrderCard';
 import { BottomTabBar } from '../../components/BottomTabBar';
-
-I18nManager.forceRTL(true);
 
 interface OrdersScreenProps {
   isAgent?: boolean;

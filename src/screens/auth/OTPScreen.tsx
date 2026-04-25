@@ -1,12 +1,11 @@
 import React, { useState, useRef, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity, TextInput, I18nManager,
+  View, Text, StyleSheet, TouchableOpacity, TextInput,
+  TouchableWithoutFeedback, Keyboard,
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
-
-I18nManager.forceRTL(true);
 
 interface OTPScreenProps {
   phone?: string;
@@ -49,6 +48,7 @@ export const OTPScreen: React.FC<OTPScreenProps> = ({
   const isComplete = otp.every(d => d !== '');
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <View style={styles.root}>
       <View style={styles.topArc} />
 
@@ -66,7 +66,7 @@ export const OTPScreen: React.FC<OTPScreenProps> = ({
             {otp.map((digit, idx) => (
               <TextInput
                 key={idx}
-                ref={r => (inputs.current[idx] = r)}
+                ref={r => { inputs.current[idx] = r; }}
                 style={[styles.otpBox, digit && styles.otpBoxFilled]}
                 value={digit}
                 onChangeText={v => handleChange(v, idx)}
@@ -97,6 +97,7 @@ export const OTPScreen: React.FC<OTPScreenProps> = ({
         </View>
       </View>
     </View>
+    </TouchableWithoutFeedback>
   );
 };
 

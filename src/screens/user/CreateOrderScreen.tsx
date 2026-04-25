@@ -2,15 +2,13 @@ import React, { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, TextInput,
   ScrollView, Modal, FlatList, KeyboardAvoidingView,
-  Platform, I18nManager,
+  Platform, TouchableWithoutFeedback, Keyboard,
 } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTopInset } from '../../hooks/useTopInset';
-
-I18nManager.forceRTL(true);
 
 const CITIES = [
   'الرياض', 'جدة', 'مكة المكرمة', 'المدينة المنورة', 'الدمام',
@@ -31,8 +29,9 @@ interface Props {
 
 export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
   const { C } = useTheme();
-  const { t } = useLanguage();
-  const styles = useMemo(() => createStyles(C), [C]);
+  const { t, lang } = useLanguage();
+  const isRTL = lang === 'ar';
+  const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
   const topPadding = useTopInset();
 
   const [description, setDescription] = useState('');
@@ -54,6 +53,7 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
   };
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <KeyboardAvoidingView
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -78,8 +78,8 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
 
         <View style={styles.fieldWrap}>
           <View style={styles.labelRow}>
-            <Text style={styles.optionalTag}>{t.create_optional}</Text>
             <Text style={styles.label}>{t.create_desc}</Text>
+            <Text style={styles.optionalTag}>{t.create_optional}</Text>
           </View>
           <TextInput
             style={styles.textArea}
@@ -89,7 +89,7 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
             multiline
             numberOfLines={4}
             textAlignVertical="top"
-            textAlign="right"
+            textAlign={isRTL ? 'right' : 'left'}
             placeholderTextColor={C.gray500}
           />
         </View>
@@ -211,19 +211,21 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
                 maximumDate={MAX_DATE}
                 onChange={handleIosDate}
                 style={{ width: '100%' }}
+                locale={lang}
               />
             </View>
           </View>
         </Modal>
       )}
     </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 
-const createStyles = (C: ThemeColors) => StyleSheet.create({
+const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bgPage },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: C.white,
@@ -231,7 +233,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     paddingBottom: Spacing.base,
     ...Shadow.header,
   },
-  backBtn: { width: 40, alignItems: 'flex-end' },
+  backBtn: { width: 40, alignItems: isRTL ? 'flex-end' : 'flex-start' },
   backIcon: { fontSize: 22, color: C.primary },
   headerTitle: {
     fontFamily: Fonts.tajawal.extraBold,
@@ -240,7 +242,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
   },
   scroll: { padding: Spacing.xl, paddingBottom: 40 },
   hintCard: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'flex-start',
     backgroundColor: C.primaryLighter,
     borderRadius: Radius.lg,
@@ -256,12 +258,12 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.sm,
     color: C.primary,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     lineHeight: 20,
   },
   fieldWrap: { marginBottom: Spacing.xl },
   labelRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     gap: Spacing.sm,
     marginBottom: Spacing.xs,
@@ -270,7 +272,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.base,
     color: C.black,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     marginBottom: Spacing.xs,
   },
   optionalTag: {
@@ -290,11 +292,11 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     paddingTop: Spacing.md,
     paddingBottom: Spacing.md,
     minHeight: 110,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     backgroundColor: C.white,
   },
   selectBtn: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderWidth: 2,
@@ -309,11 +311,20 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
     color: C.black,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
   },
   placeholder: { color: C.gray500 },
-  selectArrow: { fontSize: 14, color: C.gray500, marginLeft: 4 },
-  calIcon: { fontSize: 18, marginLeft: 4 },
+  selectArrow: {
+    fontSize: 14,
+    color: C.gray500,
+    marginLeft: isRTL ? 4 : 0,
+    marginRight: isRTL ? 0 : 4,
+  },
+  calIcon: {
+    fontSize: 18,
+    marginLeft: isRTL ? 4 : 0,
+    marginRight: isRTL ? 0 : 4,
+  },
   submitBtn: {
     backgroundColor: C.primary,
     borderRadius: Radius.lg,
@@ -373,9 +384,9 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     color: C.primary,
   },
   cityRow: {
-    flexDirection: 'row',
+    flexDirection: isRTL ? 'row' : 'row-reverse',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: isRTL ? 'flex-end' : 'flex-start',
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.md + 2,
   },
@@ -384,7 +395,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
     color: C.black,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
   },
   cityNameActive: {
     fontFamily: Fonts.tajawal.bold,
@@ -394,7 +405,8 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.inter.bold,
     fontSize: FontSize.base,
     color: C.primary,
-    marginLeft: Spacing.sm,
+    marginLeft: isRTL ? Spacing.sm : 0,
+    marginRight: isRTL ? 0 : Spacing.sm,
     width: 20,
   },
   separator: { height: 1, backgroundColor: C.gray100, marginHorizontal: Spacing.xl },

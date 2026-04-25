@@ -22,8 +22,9 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
   isAgent = false,
 }) => {
   const { C } = useTheme();
-  const { t } = useLanguage();
-  const styles = useMemo(() => createStyles(C), [C]);
+  const { t, lang } = useLanguage();
+  const isRTL = lang === 'ar';
+  const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
 
   const userTabs: TabItem[] = [
     { icon: '🏠', label: t.tab_home, route: 'home' },
@@ -40,11 +41,12 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
   ];
 
   const tabs = isAgent ? agentTabs : userTabs;
+  const renderedTabs = isRTL ? [...tabs].reverse() : tabs;
 
   return (
     <View style={styles.container}>
       <View style={[styles.bar, Shadow.fab]}>
-        {tabs.map((tab, idx) => {
+        {renderedTabs.map((tab, idx) => {
           const isActive = activeRoute === tab.route;
           return (
             <React.Fragment key={tab.route}>
@@ -74,7 +76,7 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
   );
 };
 
-const createStyles = (C: ThemeColors) => StyleSheet.create({
+const createStyles = (C: ThemeColors, _isRTL: boolean) => StyleSheet.create({
   container: {
     position: 'absolute',
     bottom: 0, left: 0, right: 0,

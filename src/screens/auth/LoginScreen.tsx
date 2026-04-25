@@ -2,13 +2,11 @@ import React, { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity,
   KeyboardAvoidingView, Platform, ScrollView,
-  TextInput, I18nManager,
+  TextInput, TouchableWithoutFeedback, Keyboard,
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
-
-I18nManager.forceRTL(true);
 
 interface LoginScreenProps {
   onLogin: (phone: string) => void;
@@ -16,11 +14,13 @@ interface LoginScreenProps {
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
   const { C } = useTheme();
-  const { t } = useLanguage();
-  const styles = useMemo(() => createStyles(C), [C]);
+  const { t, lang } = useLanguage();
+  const isRTL = lang === 'ar';
+  const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
   const [phone, setPhone] = useState('');
 
   return (
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
     <KeyboardAvoidingView
       style={styles.root}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -46,7 +46,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
               onChangeText={setPhone}
               placeholder="5xxxxxxxx"
               keyboardType="phone-pad"
-              textAlign="right"
+              textAlign={isRTL ? 'right' : 'left'}
               placeholderTextColor={C.gray500}
               maxLength={9}
             />
@@ -63,10 +63,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 
-const createStyles = (C: ThemeColors) => StyleSheet.create({
+const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.white },
   scroll: { padding: Spacing.xl, paddingTop: Spacing.xxxl + 20 },
   logoWrap: { alignItems: 'center', marginBottom: Spacing.xxl + 16 },
@@ -94,11 +95,11 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.base,
     color: C.black,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     marginBottom: Spacing.xs,
   },
   inputRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 2,
     borderColor: C.gray200,
@@ -113,13 +114,15 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     color: C.black,
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
   },
   prefix: {
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.md,
-    borderRightWidth: 1,
+    borderRightWidth: isRTL ? 1 : 0,
     borderRightColor: C.gray200,
+    borderLeftWidth: isRTL ? 0 : 1,
+    borderLeftColor: C.gray200,
   },
   prefixText: {
     fontFamily: Fonts.inter.regular,

@@ -2,14 +2,12 @@ import React, { useState, useRef, useMemo } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TextInput,
   TouchableOpacity, KeyboardAvoidingView, Platform,
-  I18nManager,
+  TouchableWithoutFeedback, Keyboard,
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTopInset } from '../../hooks/useTopInset';
-
-I18nManager.forceRTL(true);
 
 interface Message {
   id: string;
@@ -37,8 +35,9 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   onBack, agentName = 'أحمد محمد', orderId = 'ORD-593821',
 }) => {
   const { C } = useTheme();
-  const { t } = useLanguage();
-  const styles = useMemo(() => createStyles(C), [C]);
+  const { t, lang } = useLanguage();
+  const isRTL = lang === 'ar';
+  const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
   const topPadding = useTopInset();
 
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
@@ -51,7 +50,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
       id: Date.now().toString(),
       text: input.trim(),
       sender: 'user',
-      time: new Date().toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' }),
+      time: new Date().toLocaleTimeString(isRTL ? 'ar' : 'en', { hour: '2-digit', minute: '2-digit' }),
       status: 'sent',
     };
     setMessages(prev => [...prev, msg]);
@@ -60,7 +59,11 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   };
 
   return (
-    <View style={styles.root}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <KeyboardAvoidingView
+      style={styles.root}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <View style={[styles.header, Shadow.header, { paddingTop: topPadding + Spacing.sm }]}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn}>
           <Text style={styles.backIcon}>{t.back_arrow}</Text>
@@ -84,36 +87,33 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         keyExtractor={m => m.id}
         renderItem={({ item }) => <MessageBubble message={item} C={C} styles={styles} />}
         contentContainerStyle={styles.messagesList}
+        style={styles.messagesFlex}
         onContentSizeChange={() => flatRef.current?.scrollToEnd()}
       />
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={80}
-      >
-        <View style={styles.inputBar}>
-          <TouchableOpacity style={styles.attachBtn}>
-            <Text style={styles.attachIcon}>📎</Text>
-          </TouchableOpacity>
-          <TextInput
-            style={styles.input}
-            value={input}
-            onChangeText={setInput}
-            placeholder={t.chat_ph}
-            placeholderTextColor={C.gray500}
-            textAlign="right"
-            multiline
-          />
-          <TouchableOpacity
-            style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]}
-            onPress={sendMessage}
-            disabled={!input.trim()}
-          >
-            <Text style={styles.sendIcon}>⬆️</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    </View>
+      <View style={styles.inputBar}>
+        <TouchableOpacity style={styles.attachBtn}>
+          <Text style={styles.attachIcon}>📎</Text>
+        </TouchableOpacity>
+        <TextInput
+          style={styles.input}
+          value={input}
+          onChangeText={setInput}
+          placeholder={t.chat_ph}
+          placeholderTextColor={C.gray500}
+          textAlign={isRTL ? 'right' : 'left'}
+          multiline
+        />
+        <TouchableOpacity
+          style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]}
+          onPress={sendMessage}
+          disabled={!input.trim()}
+        >
+          <Text style={styles.sendIcon}>⬆️</Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -139,10 +139,10 @@ const MessageBubble: React.FC<{ message: Message; C: ThemeColors; styles: Return
   );
 };
 
-const createStyles = (C: ThemeColors) => StyleSheet.create({
+const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.gray100 },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     backgroundColor: C.white,
     paddingHorizontal: Spacing.xl,
@@ -151,7 +151,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
   },
   backBtn: { padding: Spacing.sm },
   backIcon: { fontSize: 20, color: C.primary },
-  headerCenter: { flex: 1, alignItems: 'flex-end' },
+  headerCenter: { flex: 1, alignItems: isRTL ? 'flex-end' : 'flex-start' },
   headerName: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.md,
@@ -177,13 +177,14 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     backgroundColor: C.primaryLighter,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.xs,
-    alignItems: 'flex-end',
+    alignItems: isRTL ? 'flex-end' : 'flex-start',
   },
   orderBannerText: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.sm,
     color: C.primary,
   },
+  messagesFlex: { flex: 1 },
   messagesList: { padding: Spacing.base, gap: Spacing.sm },
   bubbleWrap: {
     flexDirection: 'row',
@@ -191,8 +192,8 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     marginBottom: Spacing.sm,
     gap: Spacing.sm,
   },
-  bubbleWrapUser: { flexDirection: 'row-reverse' },
-  bubbleWrapAgent: { flexDirection: 'row' },
+  bubbleWrapUser: { flexDirection: isRTL ? 'row-reverse' : 'row' },
+  bubbleWrapAgent: { flexDirection: isRTL ? 'row' : 'row-reverse' },
   agentAvatar: {
     width: 30, height: 30, borderRadius: 15,
     backgroundColor: C.primaryLight,
@@ -210,18 +211,20 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
   },
   bubbleUser: {
     backgroundColor: C.primary,
-    borderBottomRightRadius: 4,
+    borderBottomRightRadius: isRTL ? 4 : Radius.lg,
+    borderBottomLeftRadius: isRTL ? Radius.lg : 4,
   },
   bubbleAgent: {
     backgroundColor: C.white,
-    borderBottomLeftRadius: 4,
+    borderBottomLeftRadius: isRTL ? 4 : Radius.lg,
+    borderBottomRightRadius: isRTL ? Radius.lg : 4,
     ...Shadow.card,
   },
   bubbleText: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
     color: C.black,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
   },
   bubbleTextUser: { color: '#FFFFFF' },
   bubbleMeta: {
@@ -239,7 +242,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
   },
   bubbleTimeUser: { color: 'rgba(255,255,255,0.7)' },
   inputBar: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'flex-end',
     backgroundColor: C.white,
     paddingHorizontal: Spacing.base,
@@ -257,7 +260,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     borderRadius: Radius.xxl,
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.sm,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     maxHeight: 100,
   },
   attachBtn: { padding: Spacing.sm },

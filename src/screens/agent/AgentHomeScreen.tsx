@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, I18nManager,
+  TouchableOpacity,
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
@@ -9,8 +9,6 @@ import { useLanguage } from '../../context/LanguageContext';
 import { AppHeader } from '../../components/AppHeader';
 import { OrderCard } from '../../components/OrderCard';
 import { BottomTabBar } from '../../components/BottomTabBar';
-
-I18nManager.forceRTL(true);
 
 interface AgentHomeScreenProps {
   onOrderPress: (orderId: string) => void;
@@ -20,13 +18,21 @@ interface AgentHomeScreenProps {
 const WEEK_DATES = [9, 10, 11, 12, 13, 14, 15];
 const BAR_DATA = [65, 80, 45, 90, 55, 75, 60];
 
-const StatCard: React.FC<{ icon: string; label: string; value: string; bg: string; textColor?: string; subColor?: string }> = ({
-  icon, label, value, bg, textColor = '#000000', subColor,
+const StatCard: React.FC<{
+  icon: string;
+  label: string;
+  value: string;
+  bg: string;
+  isRTL: boolean;
+  textColor?: string;
+  subColor?: string;
+}> = ({
+  icon, label, value, bg, isRTL, textColor = '#000000', subColor,
 }) => (
   <View style={[statCardStyle.card, { backgroundColor: bg }]}>
     <Text style={statCardStyle.icon}>{icon}</Text>
-    <Text style={[statCardStyle.value, { color: textColor }]}>{value}</Text>
-    <Text style={[statCardStyle.label, { color: subColor ?? textColor }]}>{label}</Text>
+    <Text style={[statCardStyle.value, { color: textColor, textAlign: isRTL ? 'right' : 'left' }]}>{value}</Text>
+    <Text style={[statCardStyle.label, { color: subColor ?? textColor, textAlign: isRTL ? 'right' : 'left' }]}>{label}</Text>
   </View>
 );
 
@@ -36,14 +42,15 @@ const statCardStyle = StyleSheet.create({
     minHeight: 108, justifyContent: 'space-between', margin: 4,
   },
   icon: { fontSize: 20 },
-  value: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.xl, textAlign: 'right' },
-  label: { fontFamily: Fonts.tajawal.regular, fontSize: FontSize.xs, textAlign: 'right' },
+  value: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.xl },
+  label: { fontFamily: Fonts.tajawal.regular, fontSize: FontSize.xs },
 });
 
 export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, onTabPress }) => {
   const { C } = useTheme();
-  const { t } = useLanguage();
-  const styles = useMemo(() => createStyles(C), [C]);
+  const { t, lang } = useLanguage();
+  const isRTL = lang === 'ar';
+  const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
   const [activeDay, setActiveDay] = useState(0);
   const [activeTab, setActiveTab] = useState('home');
   const maxBar = Math.max(...BAR_DATA);
@@ -74,8 +81,8 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <TouchableOpacity><Text style={styles.seeAll}>{t.agent_full_cal}</Text></TouchableOpacity>
             <Text style={styles.sectionTitle}>{t.agent_schedule}</Text>
+            <TouchableOpacity><Text style={styles.seeAll}>{t.agent_full_cal}</Text></TouchableOpacity>
           </View>
           <View style={styles.weekRow}>
             {t.days.map((day, idx) => (
@@ -92,18 +99,18 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { textAlign: 'right', marginBottom: Spacing.sm }]}>{t.agent_perf}</Text>
+          <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left', marginBottom: Spacing.sm }]}>{t.agent_perf}</Text>
           <View style={styles.statsRow}>
             <StatCard icon="✅" label={t.agent_completed} value="30"
-              bg={C.primaryLighter} textColor={C.primary} subColor={C.textSecondary} />
+              bg={C.primaryLighter} isRTL={isRTL} textColor={C.primary} subColor={C.textSecondary} />
             <StatCard icon="📋" label={t.agent_active_orders} value="10"
-              bg={C.primaryLight} textColor="#FFFFFF" subColor="rgba(255,255,255,0.8)" />
+              bg={C.primaryLight} isRTL={isRTL} textColor="#FFFFFF" subColor="rgba(255,255,255,0.8)" />
           </View>
           <View style={styles.statsRow}>
             <StatCard icon="💰" label={t.agent_earnings} value="4,980 ر.س"
-              bg={C.primary} textColor="#FFFFFF" subColor="rgba(255,255,255,0.8)" />
+              bg={C.primary} isRTL={isRTL} textColor="#FFFFFF" subColor="rgba(255,255,255,0.8)" />
             <StatCard icon="📃" label={t.agent_pending} value="5"
-              bg={C.primaryLighter} textColor={C.black} subColor={C.textSecondary} />
+              bg={C.primaryLighter} isRTL={isRTL} textColor={C.black} subColor={C.textSecondary} />
           </View>
         </View>
 
@@ -133,8 +140,8 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <TouchableOpacity><Text style={styles.seeAll}>{t.agent_see_all}</Text></TouchableOpacity>
             <Text style={styles.sectionTitle}>{t.agent_recent}</Text>
+            <TouchableOpacity><Text style={styles.seeAll}>{t.agent_see_all}</Text></TouchableOpacity>
           </View>
           <OrderCard
             orderId="ORD-593821"
@@ -160,12 +167,12 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
   );
 };
 
-const createStyles = (C: ThemeColors) => StyleSheet.create({
+const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bgPage },
   scroll: { flex: 1 },
   section: { marginBottom: Spacing.base, paddingHorizontal: Spacing.xl },
   sectionHeader: {
-    flexDirection: 'row',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.sm,
@@ -174,6 +181,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.md,
     color: C.black,
+    textAlign: isRTL ? 'right' : 'left',
   },
   seeAll: {
     fontFamily: Fonts.tajawal.regular,
@@ -189,7 +197,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     borderColor: C.primaryLight,
   },
   goalHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.sm,
@@ -208,6 +216,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     height: 6, borderRadius: 70,
     backgroundColor: C.gray200,
     marginBottom: Spacing.sm,
+    transform: [{ scaleX: isRTL ? -1 : 1 }],
   },
   progressFill: {
     height: 6, borderRadius: 70,
@@ -217,10 +226,10 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.sm,
     color: C.textSecondary,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
   },
   weekRow: {
-    flexDirection: 'row',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     justifyContent: 'space-between',
     backgroundColor: C.gray100,
     borderRadius: Radius.xl,
@@ -245,7 +254,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     color: C.black,
   },
   dayNumActive: { color: '#FFFFFF' },
-  statsRow: { flexDirection: 'row', marginBottom: 0 },
+  statsRow: { flexDirection: isRTL ? 'row-reverse' : 'row', marginBottom: 0 },
   chartCard: {
     backgroundColor: C.white,
     borderRadius: Radius.xl,
@@ -255,7 +264,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
     color: C.textSecondary,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
     marginBottom: Spacing.base,
   },
   barChart: {

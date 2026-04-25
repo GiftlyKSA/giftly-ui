@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, Animated, TouchableOpacity, I18nManager,
+  View, Text, StyleSheet, Animated, TouchableOpacity,
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
-
-I18nManager.forceRTL(true);
 
 interface Props {
   onDone: () => void;

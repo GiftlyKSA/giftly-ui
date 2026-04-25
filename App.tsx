@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { View, StyleSheet, I18nManager } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
@@ -22,9 +22,6 @@ import { LanguageProvider } from './src/context/LanguageContext';
 
 // Keep splash screen visible while loading fonts
 SplashScreen.preventAutoHideAsync();
-
-// Force RTL for Arabic
-I18nManager.forceRTL(true);
 
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({

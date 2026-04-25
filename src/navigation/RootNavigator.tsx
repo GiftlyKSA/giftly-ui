@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { I18nManager } from 'react-native';
 import OnboardingScreen from '../screens/auth/OnboardingScreen';
 import { LoginScreen } from '../screens/auth/LoginScreen';
 import { RegisterScreen } from '../screens/auth/RegisterScreen';
@@ -12,8 +11,6 @@ import { OrderTrackingScreen } from '../screens/user/OrderTrackingScreen';
 import { OrdersScreen } from '../screens/user/OrdersScreen';
 import { ChatScreen } from '../screens/user/ChatScreen';
 import { ProfileScreen } from '../screens/user/ProfileScreen';
-
-I18nManager.forceRTL(true);
 
 type Screen =
   | 'onboarding' | 'login' | 'register' | 'otp'

@@ -1,10 +1,8 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, I18nManager } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../constants/colors';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
-
-I18nManager.forceRTL(true);
 
 interface OrderCardProps {
   orderId: string;
@@ -20,8 +18,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   orderId, eventName, status, time, messageCount = 0, onPress, onViewDetails,
 }) => {
   const { C } = useTheme();
-  const { t } = useLanguage();
-  const styles = useMemo(() => createStyles(C), [C]);
+  const { t, lang } = useLanguage();
+  const isRTL = lang === 'ar';
+  const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
 
   const statusConfig = {
     preparing: { label: t.status_preparing, color: C.info, bg: C.infoBg },
@@ -64,9 +63,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   );
 };
 
-const createStyles = (C: ThemeColors) => StyleSheet.create({
+const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   card: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     backgroundColor: C.white,
     borderRadius: Radius.lg,
@@ -75,25 +74,25 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     padding: Spacing.md,
     marginBottom: Spacing.sm,
   },
-  iconWrap: { marginLeft: Spacing.sm },
+  iconWrap: { marginLeft: isRTL ? Spacing.sm : 0, marginRight: isRTL ? 0 : Spacing.sm },
   iconCircle: {
     width: 40, height: 40, borderRadius: Radius.md,
     backgroundColor: C.primaryLighter,
     alignItems: 'center', justifyContent: 'center',
   },
   iconEmoji: { fontSize: 18 },
-  content: { flex: 1, alignItems: 'flex-end' },
+  content: { flex: 1, alignItems: isRTL ? 'flex-end' : 'flex-start' },
   orderId: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.base,
     color: C.black,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
   },
   eventName: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.sm,
     color: C.textSecondary,
-    textAlign: 'right',
+    textAlign: isRTL ? 'right' : 'left',
   },
   time: {
     fontFamily: Fonts.inter.regular,
@@ -108,7 +107,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     textDecorationLine: 'underline',
     marginTop: 2,
   },
-  right: { alignItems: 'flex-start', gap: Spacing.xs },
+  right: { alignItems: isRTL ? 'flex-start' : 'flex-end', gap: Spacing.xs },
   statusBadge: {
     borderRadius: Radius.sm,
     paddingHorizontal: Spacing.sm,

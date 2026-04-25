@@ -18,31 +18,19 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   userName, balance, isAgent = false, rating, onProfilePress, onNotificationPress,
 }) => {
   const { C } = useTheme();
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
+  const isRTL = lang === 'ar';
   const { top } = useSafeAreaInsets();
-  const topPadding = Platform.OS === 'ios' ? top : (StatusBar.currentHeight ?? 0);
-  const styles = useMemo(() => createStyles(C), [C]);
+  const topPadding = Platform.OS === 'ios' ? top : (StatusBar.currentHeight ?? 0) + 4;
+  const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
 
   return (
     <View style={[styles.header, Shadow.header, { paddingTop: topPadding + Spacing.sm }]}>
       <StatusBar barStyle={C.black === '#000000' ? 'dark-content' : 'light-content'}
         backgroundColor={C.white} translucent={Platform.OS === 'android'} />
 
-      <View style={styles.left}>
-        {isAgent ? (
-          <TouchableOpacity style={styles.iconBtn} onPress={onNotificationPress}>
-            <Text style={styles.iconText}>📊</Text>
-          </TouchableOpacity>
-        ) : balance !== undefined ? (
-          <View style={styles.balanceRow}>
-            <Text style={styles.balanceAmount}>{balance}</Text>
-            <Text style={styles.balanceCurrency}>{t.home_currency}</Text>
-          </View>
-        ) : null}
-      </View>
-
       <TouchableOpacity style={styles.profileRow} onPress={onProfilePress}>
-        <View style={styles.textCol}>
+         <View style={styles.textCol}>
           <Text style={styles.greeting}>{t.home_greeting}{userName}</Text>
           {isAgent && rating ? (
             <View style={styles.starsRow}>
@@ -56,13 +44,26 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
           <Text style={styles.avatarText}>{userName.charAt(0)}</Text>
         </View>
       </TouchableOpacity>
+
+      <View style={styles.left}>
+        {isAgent ? (
+          <TouchableOpacity style={styles.iconBtn} onPress={onNotificationPress}>
+            <Text style={styles.iconText}>📊</Text>
+          </TouchableOpacity>
+        ) : balance !== undefined ? (
+          <View style={styles.balanceRow}>
+            <Text style={styles.balanceAmount}>{balance}</Text>
+            <Text style={styles.balanceCurrency}>{t.home_currency}</Text>
+          </View>
+        ) : null}
+      </View>
     </View>
   );
 };
 
-const createStyles = (C: ThemeColors) => StyleSheet.create({
+const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: isRTL ? 'row-reverse' : 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: C.white,
@@ -71,13 +72,18 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     borderBottomLeftRadius: Radius.lg,
     borderBottomRightRadius: Radius.lg,
   },
-  left: { alignItems: 'flex-start' },
-  balanceRow: { flexDirection: 'row', alignItems: 'center' },
+  left: { alignItems: isRTL ? 'flex-start' : 'flex-end' },
+  balanceRow: { flexDirection: isRTL ? 'row' : 'row-reverse', alignItems: 'center' },
   balanceAmount: { fontFamily: Fonts.tajawal.bold, fontSize: 22, color: C.primary },
   balanceCurrency: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.base, color: C.primary },
-  profileRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: Spacing.sm },
-  textCol: { alignItems: 'flex-end' },
-  greeting: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.base, color: C.black, textAlign: 'right' },
+  profileRow: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: Spacing.sm },
+  textCol: { alignItems: isRTL ? 'flex-end' : 'flex-start' },
+  greeting: {
+    fontFamily: Fonts.tajawal.bold,
+    fontSize: FontSize.base,
+    color: C.black,
+    textAlign: isRTL ? 'right' : 'left',
+  },
   starsRow: { flexDirection: 'row', gap: 2, marginTop: 2 },
   star: { fontSize: 10, color: C.gray300 },
   starFilled: { color: '#FFB800' },
