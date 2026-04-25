@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, I18nManager } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../constants/colors';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 I18nManager.forceRTL(true);
 
@@ -19,13 +20,14 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   orderId, eventName, status, time, messageCount = 0, onPress, onViewDetails,
 }) => {
   const { C } = useTheme();
+  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(C), [C]);
 
   const statusConfig = {
-    preparing: { label: 'قيد التجهيز', color: C.info, bg: C.infoBg },
-    delivering: { label: 'خرج للتوصيل', color: '#4CAF50', bg: 'rgba(76,175,80,0.2)' },
-    delivered: { label: 'تم التوصيل', color: C.teal, bg: 'rgba(38,143,133,0.2)' },
-    cancelled: { label: 'ملغي', color: C.error, bg: 'rgba(219,13,13,0.1)' },
+    preparing: { label: t.status_preparing, color: C.info, bg: C.infoBg },
+    delivering: { label: t.status_delivering, color: '#4CAF50', bg: 'rgba(76,175,80,0.2)' },
+    delivered: { label: t.status_delivered, color: C.teal, bg: 'rgba(38,143,133,0.2)' },
+    cancelled: { label: t.status_cancelled, color: C.error, bg: 'rgba(219,13,13,0.1)' },
   };
 
   const cfg = statusConfig[status];
@@ -43,7 +45,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         <Text style={styles.eventName}>{eventName}</Text>
         {time ? <Text style={styles.time}>{time}</Text> : null}
         <TouchableOpacity onPress={onViewDetails}>
-          <Text style={styles.viewDetails}>عرض التفاصيل</Text>
+          <Text style={styles.viewDetails}>{t.ord_view}</Text>
         </TouchableOpacity>
       </View>
 

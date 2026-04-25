@@ -7,6 +7,7 @@ import {
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { ThemeColors, Spacing, Radius, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 I18nManager.forceRTL(true);
 
@@ -23,6 +24,7 @@ const MIN_DATE = new Date(1900, 0, 1);
 
 export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegister, onGoLogin }) => {
   const { C } = useTheme();
+  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(C), [C]);
 
   const [name, setName] = useState('');
@@ -58,28 +60,26 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegister, onGo
     >
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
         <TouchableOpacity onPress={onGoLogin} style={styles.backBtn}>
-          <Text style={styles.backText}>→</Text>
+          <Text style={styles.backText}>{t.back_arrow}</Text>
         </TouchableOpacity>
 
-        <Text style={styles.title}>إنشاء حساب جديد</Text>
-        <Text style={styles.subtitle}>سجّل كعميل للبدء في استخدام Giftly</Text>
+        <Text style={styles.title}>{t.reg_title}</Text>
+        <Text style={styles.subtitle}>{t.reg_subtitle}</Text>
 
-        {/* Name */}
         <View style={styles.fieldWrap}>
-          <Text style={styles.label}>الاسم الكامل</Text>
+          <Text style={styles.label}>{t.reg_name}</Text>
           <TextInput
             style={styles.input}
             value={name}
             onChangeText={setName}
-            placeholder="محمد أحمد"
+            placeholder={t.reg_name_ph}
             textAlign="right"
             placeholderTextColor={C.gray500}
           />
         </View>
 
-        {/* Phone */}
         <View style={styles.fieldWrap}>
-          <Text style={styles.label}>رقم الجوال</Text>
+          <Text style={styles.label}>{t.reg_phone}</Text>
           <View style={styles.inputRow}>
             <View style={styles.prefix}>
               <Text style={styles.prefixText}>🇸🇦 +966</Text>
@@ -97,9 +97,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegister, onGo
           </View>
         </View>
 
-        {/* Email */}
         <View style={styles.fieldWrap}>
-          <Text style={styles.label}>البريد الإلكتروني</Text>
+          <Text style={styles.label}>{t.reg_email}</Text>
           <TextInput
             style={styles.input}
             value={email}
@@ -112,9 +111,8 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegister, onGo
           />
         </View>
 
-        {/* Date of Birth */}
         <View style={styles.fieldWrap}>
-          <Text style={styles.label}>تاريخ الميلاد</Text>
+          <Text style={styles.label}>{t.reg_dob}</Text>
           <TouchableOpacity style={styles.dateBtn} onPress={openPicker} activeOpacity={0.7}>
             <Text style={[styles.dateBtnText, !dob && styles.datePlaceholder]}>
               {dob ? formatDate(dob) : 'DD MMM YYYY'}
@@ -145,11 +143,11 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegister, onGo
               <View style={styles.modalSheet}>
                 <View style={styles.modalHeader}>
                   <TouchableOpacity onPress={() => setShowPicker(false)}>
-                    <Text style={styles.modalCancel}>إلغاء</Text>
+                    <Text style={styles.modalCancel}>{t.btn_cancel}</Text>
                   </TouchableOpacity>
-                  <Text style={styles.modalTitle}>تاريخ الميلاد</Text>
+                  <Text style={styles.modalTitle}>{t.reg_dob}</Text>
                   <TouchableOpacity onPress={confirmIos}>
-                    <Text style={styles.modalDone}>تم</Text>
+                    <Text style={styles.modalDone}>{t.btn_done}</Text>
                   </TouchableOpacity>
                 </View>
                 <DateTimePicker
@@ -168,10 +166,10 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegister, onGo
         )}
 
         <View style={styles.termsRow}>
-          <Text style={styles.termsText}>أوافق على </Text>
-          <TouchableOpacity><Text style={styles.termsLink}>الشروط والأحكام</Text></TouchableOpacity>
-          <Text style={styles.termsText}> و</Text>
-          <TouchableOpacity><Text style={styles.termsLink}> سياسة الخصوصية</Text></TouchableOpacity>
+          <Text style={styles.termsText}>{t.reg_terms1}</Text>
+          <TouchableOpacity><Text style={styles.termsLink}>{t.reg_terms2}</Text></TouchableOpacity>
+          <Text style={styles.termsText}>{t.reg_terms3}</Text>
+          <TouchableOpacity><Text style={styles.termsLink}>{t.reg_terms4}</Text></TouchableOpacity>
         </View>
 
         <TouchableOpacity
@@ -179,12 +177,12 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ onRegister, onGo
           onPress={onRegister}
           activeOpacity={0.85}
         >
-          <Text style={styles.registerBtnText}>إنشاء الحساب</Text>
+          <Text style={styles.registerBtnText}>{t.reg_btn}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.loginRow} onPress={onGoLogin}>
-          <Text style={styles.loginText}>لديك حساب بالفعل؟ </Text>
-          <Text style={styles.loginLink}>تسجيل الدخول</Text>
+          <Text style={styles.loginText}>{t.reg_have_account}</Text>
+          <Text style={styles.loginLink}>{t.reg_signin}</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

@@ -18,6 +18,7 @@ import {
 } from '@expo-google-fonts/inter';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
+import { LanguageProvider } from './src/context/LanguageContext';
 
 // Keep splash screen visible while loading fonts
 SplashScreen.preventAutoHideAsync();
@@ -49,7 +50,9 @@ export default function App() {
 
   return (
     <ThemeProvider>
-      <AppShell onLayout={onLayoutRootView} />
+      <LanguageProvider>
+        <AppShell onLayout={onLayoutRootView} />
+      </LanguageProvider>
     </ThemeProvider>
   );
 }

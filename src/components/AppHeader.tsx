@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Platform } from 'r
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemeColors, Shadow, Spacing, Radius, Fonts, FontSize } from '../constants/colors';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface AppHeaderProps {
   userName: string;
@@ -17,6 +18,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   userName, balance, isAgent = false, rating, onProfilePress, onNotificationPress,
 }) => {
   const { C } = useTheme();
+  const { t } = useLanguage();
   const { top } = useSafeAreaInsets();
   const topPadding = Platform.OS === 'ios' ? top : (StatusBar.currentHeight ?? 0);
   const styles = useMemo(() => createStyles(C), [C]);
@@ -34,14 +36,14 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         ) : balance !== undefined ? (
           <View style={styles.balanceRow}>
             <Text style={styles.balanceAmount}>{balance}</Text>
-            <Text style={styles.balanceCurrency}> ر.س</Text>
+            <Text style={styles.balanceCurrency}>{t.home_currency}</Text>
           </View>
         ) : null}
       </View>
 
       <TouchableOpacity style={styles.profileRow} onPress={onProfilePress}>
         <View style={styles.textCol}>
-          <Text style={styles.greeting}>اهلاً، {userName}</Text>
+          <Text style={styles.greeting}>{t.home_greeting}{userName}</Text>
           {isAgent && rating ? (
             <View style={styles.starsRow}>
               {[1,2,3,4,5].map(i => (

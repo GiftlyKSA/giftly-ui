@@ -5,44 +5,28 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Spacing, Radius, Fonts, FontSize } from '../../constants/colors';
+import { useLanguage } from '../../context/LanguageContext';
 
 const { width } = Dimensions.get('window');
-
-const slides = [
-  {
-    id: '1',
-    title: 'اختيارات تصنع\nلحظة لا تُنسى',
-    subtitle: 'اعثر على الهدية المثالية لكل مناسبة\nمع خبراء الهدايا لدينا',
-    emoji: '🎁',
-  },
-  {
-    id: '2',
-    title: 'خبراء الهدايا\nفي خدمتك',
-    subtitle: 'يساعدك خبراؤنا في اختيار\nأفضل الهدايا المصممة خصيصاً لك',
-    emoji: '🌟',
-  },
-  {
-    id: '3',
-    title: 'تتبع طلبك\nبكل سهولة',
-    subtitle: 'تابع حالة هديتك خطوة بخطوة\nحتى تصل إلى وجهتها',
-    emoji: '📦',
-  },
-];
-
-const LAST = slides.length - 1;
+const LAST = 2;
 
 interface Props {
   onFinish: () => void;
 }
 
 export default function OnboardingScreen({ onFinish }: Props) {
+  const { t } = useLanguage();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatRef = useRef<FlatList>(null);
   const pulse = useRef(new Animated.Value(1)).current;
-  // Tracks horizontal scroll to compute skip opacity smoothly
   const scrollX = useRef(new Animated.Value(0)).current;
 
-  // Fade skip button out as the user scrolls toward the last slide
+  const slides = [
+    { id: '1', title: t.ob_s1_title, subtitle: t.ob_s1_sub, emoji: '🎁' },
+    { id: '2', title: t.ob_s2_title, subtitle: t.ob_s2_sub, emoji: '🌟' },
+    { id: '3', title: t.ob_s3_title, subtitle: t.ob_s3_sub, emoji: '📦' },
+  ];
+
   const skipOpacity = useMemo(
     () =>
       scrollX.interpolate({
@@ -68,7 +52,6 @@ export default function OnboardingScreen({ onFinish }: Props) {
   }, [currentIndex]);
 
   const goToIndex = (idx: number) => {
-    // scrollToOffset is reliable in both LTR and RTL — avoids jumpiness of scrollToIndex
     flatRef.current?.scrollToOffset({ offset: idx * width, animated: true });
     setCurrentIndex(idx);
   };
@@ -82,71 +65,61 @@ export default function OnboardingScreen({ onFinish }: Props) {
     <View style={styles.container}>
       <LinearGradient colors={['#673195', '#4A1580']} style={StyleSheet.absoluteFillObject} />
 
-      {/* Skip fades out when approaching the last slide */}
       <Animated.View style={[styles.skip, { opacity: skipOpacity }]} pointerEvents={currentIndex === LAST ? 'none' : 'auto'}>
         <TouchableOpacity onPress={onFinish}>
-          <Text style={styles.skipText}>تخطي</Text>
+          <Text style={styles.skipText}>{t.ob_skip}</Text>
         </TouchableOpacity>
       </Animated.View>
 
-      <FlatList
-        ref={flatRef}
-        data={slides}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={item => item.id}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: false },
-        )}
-        scrollEventThrottle={16}
-        onMomentumScrollEnd={e => {
-          const idx = Math.round(e.nativeEvent.contentOffset.x / width);
-          setCurrentIndex(idx);
-        }}
-        renderItem={({ item }) => (
-          <View style={styles.slide}>
-            <View style={styles.emojiWrap}>
-              <Text style={styles.emoji}>{item.emoji}</Text>
+      {/* direction: 'ltr' ensures item[0] = leftmost = offset 0, works reliably in RTL apps */}
+      <View style={styles.flatWrap}>
+        <FlatList
+          ref={flatRef}
+          data={slides}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={item => item.id}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+            { useNativeDriver: false },
+          )}
+          scrollEventThrottle={16}
+          onMomentumScrollEnd={e => {
+            const idx = Math.round(e.nativeEvent.contentOffset.x / width);
+            setCurrentIndex(Math.max(0, Math.min(idx, LAST)));
+          }}
+          renderItem={({ item }) => (
+            <View style={styles.slide}>
+              <View style={styles.emojiWrap}>
+                <Text style={styles.emoji}>{item.emoji}</Text>
+              </View>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.subtitle}>{item.subtitle}</Text>
             </View>
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.subtitle}>{item.subtitle}</Text>
-          </View>
-        )}
-      />
+          )}
+        />
 
-      {/* Dots — tappable */}
-      <View style={styles.dots}>
-        {slides.map((_, i) => (
-          <TouchableOpacity key={i} onPress={() => goToIndex(i)}>
-            <View style={[styles.dot, i === currentIndex && styles.dotActive]} />
-          </TouchableOpacity>
-        ))}
+        <View style={styles.dots}>
+          {slides.map((_, i) => (
+            <TouchableOpacity key={i} onPress={() => goToIndex(i)}>
+              <View style={[styles.dot, i === currentIndex && styles.dotActive]} />
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
-      {/* Footer */}
       <View style={styles.footer}>
         {currentIndex < LAST ? (
           <TouchableOpacity style={styles.btnPrimary} onPress={handleNext} activeOpacity={0.85}>
-            <Text style={styles.btnPrimaryText}>التالي</Text>
+            <Text style={styles.btnPrimaryText}>{t.ob_next}</Text>
           </TouchableOpacity>
         ) : (
-          <>
-            <Animated.View style={{ transform: [{ scale: pulse }] }}>
-              <TouchableOpacity style={styles.btnStart} onPress={onFinish} activeOpacity={0.85}>
-                <Text style={styles.btnStartText}>ابدأ الآن 🚀</Text>
-              </TouchableOpacity>
-            </Animated.View>
-
-            <TouchableOpacity style={styles.startHint} onPress={onFinish} activeOpacity={0.7}>
-              <Text style={styles.startHintText}>اضغط هنا للانطلاق ←</Text>
+          <Animated.View style={{ transform: [{ scale: pulse }] }}>
+            <TouchableOpacity style={styles.btnStart} onPress={onFinish} activeOpacity={0.85}>
+              <Text style={styles.btnStartText}>{t.ob_start}</Text>
             </TouchableOpacity>
-
-            <TouchableOpacity style={styles.loginLinkWrap} onPress={onFinish}>
-              <Text style={styles.loginLink}>لديك حساب بالفعل؟ تسجيل الدخول</Text>
-            </TouchableOpacity>
-          </>
+          </Animated.View>
         )}
       </View>
     </View>
@@ -157,12 +130,14 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   skip: { position: 'absolute', top: 55, left: 24, zIndex: 10 },
   skipText: { fontFamily: Fonts.tajawal.regular, fontSize: FontSize.base, color: 'rgba(255,255,255,0.7)' },
+  flatWrap: { flex: 1, direction: 'ltr' },
   slide: {
     width,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 40,
     paddingTop: 80,
+    direction: 'rtl',
   },
   emojiWrap: {
     width: 160, height: 160, borderRadius: 80,
@@ -209,8 +184,4 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   btnStartText: { fontFamily: Fonts.tajawal.extraBold, fontSize: FontSize.md, color: '#673195' },
-  startHint: { alignItems: 'center', paddingVertical: 4 },
-  startHintText: { fontFamily: Fonts.tajawal.medium, fontSize: FontSize.sm, color: 'rgba(255,255,255,0.6)' },
-  loginLinkWrap: { alignItems: 'center' },
-  loginLink: { fontFamily: Fonts.tajawal.regular, fontSize: FontSize.base, color: 'rgba(255,255,255,0.8)', textAlign: 'center' },
 });

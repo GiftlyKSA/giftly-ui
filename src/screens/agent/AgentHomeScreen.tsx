@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { AppHeader } from '../../components/AppHeader';
 import { OrderCard } from '../../components/OrderCard';
 import { BottomTabBar } from '../../components/BottomTabBar';
@@ -16,7 +17,6 @@ interface AgentHomeScreenProps {
   onTabPress: (route: string) => void;
 }
 
-const WEEK_DAYS = ['الأح', 'الإث', 'الثل', 'الأر', 'الخم', 'الجم', 'الس'];
 const WEEK_DATES = [9, 10, 11, 12, 13, 14, 15];
 const BAR_DATA = [65, 80, 45, 90, 55, 75, 60];
 
@@ -42,6 +42,7 @@ const statCardStyle = StyleSheet.create({
 
 export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, onTabPress }) => {
   const { C } = useTheme();
+  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(C), [C]);
   const [activeDay, setActiveDay] = useState(0);
   const [activeTab, setActiveTab] = useState('home');
@@ -62,22 +63,22 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
           <View style={styles.goalCard}>
             <View style={styles.goalHeader}>
               <Text style={styles.goalValue}>6,000 ر.س</Text>
-              <Text style={styles.goalLabel}>هدف الأرباح</Text>
+              <Text style={styles.goalLabel}>{t.agent_goal}</Text>
             </View>
             <View style={styles.progressBg}>
               <View style={[styles.progressFill, { width: '83%' }]} />
             </View>
-            <Text style={styles.goalSub}>لقد حققت 83% من هدفك هذا الشهر 🎯</Text>
+            <Text style={styles.goalSub}>{t.agent_goal_sub}</Text>
           </View>
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <TouchableOpacity><Text style={styles.seeAll}>التقويم الكامل</Text></TouchableOpacity>
-            <Text style={styles.sectionTitle}>الجدول الأسبوعي</Text>
+            <TouchableOpacity><Text style={styles.seeAll}>{t.agent_full_cal}</Text></TouchableOpacity>
+            <Text style={styles.sectionTitle}>{t.agent_schedule}</Text>
           </View>
           <View style={styles.weekRow}>
-            {WEEK_DAYS.map((day, idx) => (
+            {t.days.map((day, idx) => (
               <TouchableOpacity
                 key={idx}
                 style={[styles.dayCol, activeDay === idx && styles.dayColActive]}
@@ -91,24 +92,24 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
         </View>
 
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { textAlign: 'right', marginBottom: Spacing.sm }]}>ملخص الأداء</Text>
+          <Text style={[styles.sectionTitle, { textAlign: 'right', marginBottom: Spacing.sm }]}>{t.agent_perf}</Text>
           <View style={styles.statsRow}>
-            <StatCard icon="✅" label="طلبات مكتملة" value="30"
+            <StatCard icon="✅" label={t.agent_completed} value="30"
               bg={C.primaryLighter} textColor={C.primary} subColor={C.textSecondary} />
-            <StatCard icon="📋" label="طلبات نشطة" value="10"
+            <StatCard icon="📋" label={t.agent_active_orders} value="10"
               bg={C.primaryLight} textColor="#FFFFFF" subColor="rgba(255,255,255,0.8)" />
           </View>
           <View style={styles.statsRow}>
-            <StatCard icon="💰" label="الأرباح هذا الشهر" value="4,980 ر.س"
+            <StatCard icon="💰" label={t.agent_earnings} value="4,980 ر.س"
               bg={C.primary} textColor="#FFFFFF" subColor="rgba(255,255,255,0.8)" />
-            <StatCard icon="📃" label="طلبات معلقة" value="5"
+            <StatCard icon="📃" label={t.agent_pending} value="5"
               bg={C.primaryLighter} textColor={C.black} subColor={C.textSecondary} />
           </View>
         </View>
 
         <View style={styles.section}>
           <View style={[styles.chartCard, Shadow.card]}>
-            <Text style={styles.chartTitle}>إجمالي الأرباح / أسبوع</Text>
+            <Text style={styles.chartTitle}>{t.agent_chart}</Text>
             <View style={styles.barChart}>
               {BAR_DATA.map((val, idx) => (
                 <View key={idx} style={styles.barCol}>
@@ -123,7 +124,7 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
                       ]}
                     />
                   </View>
-                  <Text style={styles.barLabel}>{WEEK_DAYS[idx]}</Text>
+                  <Text style={styles.barLabel}>{t.days[idx]}</Text>
                 </View>
               ))}
             </View>
@@ -132,8 +133,8 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <TouchableOpacity><Text style={styles.seeAll}>عرض الكل</Text></TouchableOpacity>
-            <Text style={styles.sectionTitle}>الطلبات الحديثة</Text>
+            <TouchableOpacity><Text style={styles.seeAll}>{t.agent_see_all}</Text></TouchableOpacity>
+            <Text style={styles.sectionTitle}>{t.agent_recent}</Text>
           </View>
           <OrderCard
             orderId="ORD-593821"

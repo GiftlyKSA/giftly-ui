@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { ThemeColors, Spacing, Shadow, Fonts, FontSize } from '../constants/colors';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 
 interface TabItem {
   icon: string;
@@ -15,27 +16,29 @@ interface BottomTabBarProps {
   isAgent?: boolean;
 }
 
-const userTabs: TabItem[] = [
-  { icon: '🏠', label: 'الرئيسية', route: 'home' },
-  { icon: '📦', label: 'طلباتي', route: 'orders' },
-  { icon: '💬', label: 'المحادثات', route: 'chat' },
-  { icon: '👤', label: 'حسابي', route: 'profile' },
-];
-
-const agentTabs: TabItem[] = [
-  { icon: '🏠', label: 'الرئيسية', route: 'home' },
-  { icon: '📋', label: 'الطلبات', route: 'orders' },
-  { icon: '📅', label: 'الجدول', route: 'calendar' },
-  { icon: '👤', label: 'حسابي', route: 'profile' },
-];
-
 export const BottomTabBar: React.FC<BottomTabBarProps> = ({
   activeRoute,
   onTabPress,
   isAgent = false,
 }) => {
   const { C } = useTheme();
+  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(C), [C]);
+
+  const userTabs: TabItem[] = [
+    { icon: '🏠', label: t.tab_home, route: 'home' },
+    { icon: '📦', label: t.tab_orders, route: 'orders' },
+    { icon: '💬', label: t.tab_chat, route: 'chat' },
+    { icon: '👤', label: t.tab_profile, route: 'profile' },
+  ];
+
+  const agentTabs: TabItem[] = [
+    { icon: '🏠', label: t.tab_home, route: 'home' },
+    { icon: '📋', label: t.tab_orders, route: 'orders' },
+    { icon: '📅', label: t.tab_calendar, route: 'calendar' },
+    { icon: '👤', label: t.tab_profile, route: 'profile' },
+  ];
+
   const tabs = isAgent ? agentTabs : userTabs;
 
   return (

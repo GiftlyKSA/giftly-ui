@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { AppHeader } from '../../components/AppHeader';
 import { OrderCard } from '../../components/OrderCard';
 import { BottomTabBar } from '../../components/BottomTabBar';
@@ -16,22 +17,16 @@ interface UserHomeScreenProps {
   onTabPress: (route: string) => void;
 }
 
-const UPCOMING_EVENTS = [
-  { id: '1', title: 'يوم ميلاد ......', date: '9 أبريل', daysLeft: 3, icon: '🎂' },
-  { id: '2', title: 'يوم تخرج .......', date: '15 أبريل', daysLeft: 9, icon: '🎓' },
-  { id: '3', title: 'يوم زواج .......', date: '22 أبريل', daysLeft: 16, icon: '💍' },
-];
+const WEEK_DATES = [9, 10, 11, 12, 13, 14, 15];
 
 const ORDERS = [
   { id: 'ORD-593821', eventName: 'يوم ميلاد', status: 'preparing' as const, time: '12.00 - 16.00', messageCount: 20 },
   { id: 'ORD-593822', eventName: 'يوم تخرج', status: 'delivering' as const, time: '10.00 - 14.00', messageCount: 5 },
 ];
 
-const WEEK_DAYS = ['الأح', 'الإث', 'الثل', 'الأر', 'الخم', 'الجم', 'الس'];
-const WEEK_DATES = [9, 10, 11, 12, 13, 14, 15];
-
 const GiftCard: React.FC<{ title: string; price: string; tag: string }> = ({ title, price, tag }) => {
   const { C } = useTheme();
+  const { t } = useLanguage();
   const styles = useMemo(() => createGiftCardStyles(C), [C]);
   return (
     <View style={styles.card}>
@@ -42,7 +37,7 @@ const GiftCard: React.FC<{ title: string; price: string; tag: string }> = ({ tit
         <Text style={styles.tag}>{tag}</Text>
       </View>
       <Text style={styles.title} numberOfLines={2}>{title}</Text>
-      <Text style={styles.price}>{price} ر.س</Text>
+      <Text style={styles.price}>{price}{t.gift_currency}</Text>
     </View>
   );
 };
@@ -87,6 +82,7 @@ const createGiftCardStyles = (C: ThemeColors) => StyleSheet.create({
 
 export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, onTabPress }) => {
   const { C } = useTheme();
+  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(C), [C]);
   const [activeDay, setActiveDay] = useState(0);
   const [activeTab, setActiveTab] = useState('home');
@@ -102,22 +98,18 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         <View style={styles.heroSection}>
-          <Text style={styles.heroText}>اختيارات{'\n'}تصنع لحظة لا تُنسى</Text>
+          <Text style={styles.heroText}>{t.home_hero}</Text>
         </View>
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <TouchableOpacity><Text style={styles.seeAll}>عرض الكل</Text></TouchableOpacity>
-            <Text style={styles.sectionTitle}>الهدايا المميزة</Text>
+            <TouchableOpacity><Text style={styles.seeAll}>{t.home_see_all}</Text></TouchableOpacity>
+            <Text style={styles.sectionTitle}>{t.home_featured}</Text>
           </View>
           <FlatList
             horizontal
             inverted
-            data={[
-              { title: 'باقة ورد فاخرة', price: '250', tag: 'الأكثر طلباً' },
-              { title: 'صندوق شوكولاتة بلجيكية', price: '180', tag: 'جديد' },
-              { title: 'عطر فاخر', price: '450', tag: 'مميز' },
-            ]}
+            data={t.gifts}
             renderItem={({ item }) => <GiftCard {...item} />}
             keyExtractor={(_, i) => i.toString()}
             showsHorizontalScrollIndicator={false}
@@ -127,11 +119,11 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <TouchableOpacity><Text style={styles.seeAll}>التقويم الكامل</Text></TouchableOpacity>
-            <Text style={styles.sectionTitle}>مناسباتك القادمة</Text>
+            <TouchableOpacity><Text style={styles.seeAll}>{t.home_full_cal}</Text></TouchableOpacity>
+            <Text style={styles.sectionTitle}>{t.home_upcoming}</Text>
           </View>
           <View style={styles.weekRow}>
-            {WEEK_DAYS.map((day, idx) => (
+            {t.days.map((day, idx) => (
               <TouchableOpacity
                 key={idx}
                 style={[styles.dayCol, activeDay === idx && styles.dayColActive]}
@@ -145,18 +137,18 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
         </View>
 
         <View style={styles.section}>
-          {UPCOMING_EVENTS.map(event => (
+          {t.upcoming_events.map(event => (
             <View key={event.id} style={styles.eventCard}>
               <View style={styles.eventLeft}>
                 <View style={styles.prepBtn}>
-                  <Text style={styles.prepBtnText}>جهّز هديتك</Text>
+                  <Text style={styles.prepBtnText}>{t.home_prepare}</Text>
                 </View>
               </View>
               <View style={styles.eventContent}>
                 <Text style={styles.eventTitle}>{event.title}</Text>
                 <View style={styles.eventTimeRow}>
                   <Text style={styles.eventDate}>⏰ {event.date}</Text>
-                  <Text style={styles.eventDays}> · بعد {event.daysLeft} أيام</Text>
+                  <Text style={styles.eventDays}> {t.days_left(event.daysLeft)}</Text>
                 </View>
               </View>
               <View style={styles.eventIconWrap}>
@@ -168,7 +160,7 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
 
         <View style={styles.section}>
           <View style={[styles.ordersCard, Shadow.card]}>
-            <Text style={styles.ordersTitle}>طلبات مسجلة</Text>
+            <Text style={styles.ordersTitle}>{t.home_orders}</Text>
             {ORDERS.map(order => (
               <OrderCard
                 key={order.id}

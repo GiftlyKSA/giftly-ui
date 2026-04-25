@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { useTopInset } from '../../hooks/useTopInset';
 import { OrderCard } from '../../components/OrderCard';
 import { BottomTabBar } from '../../components/BottomTabBar';
@@ -17,6 +18,8 @@ interface OrdersScreenProps {
   onTabPress: (route: string) => void;
 }
 
+type FilterKey = 'all' | 'active' | 'done' | 'cancelled';
+
 const ALL_ORDERS = [
   { id: 'ORD-593821', eventName: 'يوم ميلاد', status: 'preparing' as const, time: '12:00 - 16:00', messageCount: 20 },
   { id: 'ORD-593822', eventName: 'يوم تخرج', status: 'delivering' as const, time: '10:00 - 14:00', messageCount: 5 },
@@ -24,23 +27,31 @@ const ALL_ORDERS = [
   { id: 'ORD-593824', eventName: 'عيد ميلاد', status: 'cancelled' as const, time: '14:00 - 18:00', messageCount: 2 },
 ];
 
-const FILTERS = ['الكل', 'نشط', 'مكتمل', 'ملغي'];
+const FILTER_KEYS: FilterKey[] = ['all', 'active', 'done', 'cancelled'];
 
 export const OrdersScreen: React.FC<OrdersScreenProps> = ({
   isAgent = false, onOrderPress, onTabPress,
 }) => {
   const { C } = useTheme();
+  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(C), [C]);
   const topPadding = useTopInset();
 
-  const [activeFilter, setActiveFilter] = useState('الكل');
+  const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
   const [activeTab, setActiveTab] = useState('orders');
 
+  const filterLabel = (key: FilterKey): string => {
+    if (key === 'all') return t.ord_all;
+    if (key === 'active') return t.ord_active;
+    if (key === 'done') return t.ord_done;
+    return t.ord_cancelled;
+  };
+
   const filteredOrders = ALL_ORDERS.filter(o => {
-    if (activeFilter === 'الكل') return true;
-    if (activeFilter === 'نشط') return o.status === 'preparing' || o.status === 'delivering';
-    if (activeFilter === 'مكتمل') return o.status === 'delivered';
-    if (activeFilter === 'ملغي') return o.status === 'cancelled';
+    if (activeFilter === 'all') return true;
+    if (activeFilter === 'active') return o.status === 'preparing' || o.status === 'delivering';
+    if (activeFilter === 'done') return o.status === 'delivered';
+    if (activeFilter === 'cancelled') return o.status === 'cancelled';
     return true;
   });
 
@@ -52,14 +63,14 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({
   return (
     <View style={styles.root}>
       <View style={[styles.header, Shadow.header, { paddingTop: topPadding + Spacing.sm }]}>
-        <Text style={styles.headerTitle}>طلباتي</Text>
+        <Text style={styles.headerTitle}>{t.ord_title}</Text>
       </View>
 
       <View style={styles.filtersWrap}>
         <FlatList
           horizontal
           inverted
-          data={FILTERS}
+          data={FILTER_KEYS}
           keyExtractor={f => f}
           renderItem={({ item }) => (
             <TouchableOpacity
@@ -67,7 +78,7 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({
               onPress={() => setActiveFilter(item)}
             >
               <Text style={[styles.filterText, activeFilter === item && styles.filterTextActive]}>
-                {item}
+                {filterLabel(item)}
               </Text>
             </TouchableOpacity>
           )}
@@ -77,7 +88,7 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({
       </View>
 
       <View style={styles.summary}>
-        <Text style={styles.summaryText}>{filteredOrders.length} طلب</Text>
+        <Text style={styles.summaryText}>{t.ord_count(filteredOrders.length)}</Text>
       </View>
 
       <FlatList
@@ -98,8 +109,8 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({
         ListEmptyComponent={
           <View style={styles.emptyWrap}>
             <Text style={styles.emptyEmoji}>📭</Text>
-            <Text style={styles.emptyTitle}>لا توجد طلبات</Text>
-            <Text style={styles.emptySubtitle}>لم تقم بأي طلبات بعد</Text>
+            <Text style={styles.emptyTitle}>{t.ord_empty_title}</Text>
+            <Text style={styles.emptySubtitle}>{t.ord_empty_sub}</Text>
           </View>
         }
       />

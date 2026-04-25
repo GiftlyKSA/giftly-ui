@@ -1,11 +1,13 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView,
+  View, Text, StyleSheet, ScrollView, Modal,
   TouchableOpacity, Switch, I18nManager,
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { useTopInset } from '../../hooks/useTopInset';
+import { Lang } from '../../i18n/strings';
 
 I18nManager.forceRTL(true);
 
@@ -17,22 +19,24 @@ interface ProfileScreenProps {
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, onBack, onLogout }) => {
   const { C, isDark, toggle } = useTheme();
+  const { t, lang, setLanguage } = useLanguage();
   const styles = useMemo(() => createStyles(C), [C]);
   const topPadding = useTopInset();
 
-  const [notifEnabled, setNotifEnabled] = React.useState(true);
+  const [notifEnabled, setNotifEnabled] = useState(true);
+  const [langModalVisible, setLangModalVisible] = useState(false);
 
   return (
     <View style={styles.root}>
       <View style={[styles.header, Shadow.header, { paddingTop: topPadding + Spacing.sm }]}>
         {onBack && (
           <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-            <Text style={styles.backIcon}>→</Text>
+            <Text style={styles.backIcon}>{t.back_arrow}</Text>
           </TouchableOpacity>
         )}
-        <Text style={styles.headerTitle}>الملف الشخصي</Text>
+        <Text style={styles.headerTitle}>{t.profile_title}</Text>
         <TouchableOpacity style={styles.editBtn}>
-          <Text style={styles.editText}>✏️ تعديل</Text>
+          <Text style={styles.editText}>{t.profile_edit}</Text>
         </TouchableOpacity>
       </View>
 
@@ -75,26 +79,26 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, o
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>معلومات الحساب</Text>
+          <Text style={styles.sectionTitle}>{t.profile_account}</Text>
           <View style={styles.card}>
-            <MenuItem C={C} icon="📧" label="البريد الإلكتروني" value="example@email.com" />
+            <MenuItem C={C} icon="📧" label={t.profile_email} value="example@email.com" />
             <View style={styles.divider} />
-            <MenuItem C={C} icon="🏠" label="العنوان" value="الرياض، السعودية" />
+            <MenuItem C={C} icon="🏠" label={t.profile_address} value="الرياض، السعودية" />
             <View style={styles.divider} />
-            <MenuItem C={C} icon="💳" label="طرق الدفع" />
+            <MenuItem C={C} icon="💳" label={t.profile_payment} />
             {isAgent && (
               <>
                 <View style={styles.divider} />
-                <MenuItem C={C} icon="📊" label="تقرير الأداء" />
+                <MenuItem C={C} icon="📊" label={t.profile_report} />
                 <View style={styles.divider} />
-                <MenuItem C={C} icon="🗓️" label="الجدول الشهري" />
+                <MenuItem C={C} icon="🗓️" label={t.profile_schedule} />
               </>
             )}
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>التفضيلات</Text>
+          <Text style={styles.sectionTitle}>{t.profile_prefs}</Text>
           <View style={styles.card}>
             <View style={styles.toggleItem}>
               <Switch
@@ -104,7 +108,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, o
                 thumbColor={C.white}
               />
               <View style={styles.toggleText}>
-                <Text style={styles.menuLabel}>الإشعارات</Text>
+                <Text style={styles.menuLabel}>{t.profile_notif}</Text>
                 <View style={styles.menuIconWrap}>
                   <Text style={styles.menuIcon}>🔔</Text>
                 </View>
@@ -119,38 +123,78 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, o
                 thumbColor={C.white}
               />
               <View style={styles.toggleText}>
-                <Text style={styles.menuLabel}>الوضع الداكن</Text>
+                <Text style={styles.menuLabel}>{t.profile_dark}</Text>
                 <View style={styles.menuIconWrap}>
                   <Text style={styles.menuIcon}>🌙</Text>
                 </View>
               </View>
             </View>
             <View style={styles.divider} />
-            <MenuItem C={C} icon="🌐" label="اللغة" value="العربية" />
+            <MenuItem
+              C={C}
+              icon="🌐"
+              label={t.profile_lang}
+              value={lang === 'ar' ? t.lang_ar : t.lang_en}
+              onPress={() => setLangModalVisible(true)}
+            />
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>الدعم</Text>
+          <Text style={styles.sectionTitle}>{t.profile_support}</Text>
           <View style={styles.card}>
-            <MenuItem C={C} icon="❓" label="مركز المساعدة" />
+            <MenuItem C={C} icon="❓" label={t.profile_help} />
             <View style={styles.divider} />
-            <MenuItem C={C} icon="📜" label="الشروط والأحكام" />
+            <MenuItem C={C} icon="📜" label={t.profile_terms} />
             <View style={styles.divider} />
-            <MenuItem C={C} icon="🔒" label="سياسة الخصوصية" />
+            <MenuItem C={C} icon="🔒" label={t.profile_privacy} />
           </View>
         </View>
 
         <View style={styles.section}>
           <View style={styles.card}>
-            <MenuItem C={C} icon="🚪" label="تسجيل الخروج" onPress={onLogout} danger />
+            <MenuItem C={C} icon="🚪" label={t.profile_logout} onPress={onLogout} danger />
             <View style={styles.divider} />
-            <MenuItem C={C} icon="🗑️" label="حذف الحساب" danger />
+            <MenuItem C={C} icon="🗑️" label={t.profile_delete} danger />
           </View>
         </View>
 
-        <Text style={styles.version}>الإصدار 1.0.0</Text>
+        <Text style={styles.version}>{t.profile_version}</Text>
       </ScrollView>
+
+      {/* Language selection modal */}
+      <Modal
+        visible={langModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setLangModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.langOverlay}
+          activeOpacity={1}
+          onPress={() => setLangModalVisible(false)}
+        >
+          <View style={styles.langModal}>
+            <Text style={styles.langTitle}>{t.lang_title}</Text>
+            {(['ar', 'en'] as Lang[]).map(l => (
+              <TouchableOpacity
+                key={l}
+                style={[styles.langOption, lang === l && styles.langOptionActive]}
+                onPress={() => {
+                  setLangModalVisible(false);
+                  if (l !== lang) setLanguage(l);
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.langOptionText, lang === l && styles.langOptionTextActive]}>
+                  {l === 'ar' ? t.lang_ar : t.lang_en}
+                </Text>
+                {lang === l && <Text style={styles.langCheck}>✓</Text>}
+              </TouchableOpacity>
+            ))}
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -314,5 +358,49 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     textAlign: 'center',
     marginTop: Spacing.base,
     marginBottom: Spacing.xl,
+  },
+  langOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  langModal: {
+    backgroundColor: C.white,
+    borderRadius: Radius.xl,
+    padding: Spacing.xl,
+    width: '78%',
+    ...Shadow.card,
+  },
+  langTitle: {
+    fontFamily: Fonts.tajawal.bold,
+    fontSize: FontSize.md,
+    color: C.black,
+    textAlign: 'center',
+    marginBottom: Spacing.base,
+  },
+  langOption: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.base,
+    borderRadius: Radius.lg,
+    marginBottom: Spacing.xs,
+  },
+  langOptionActive: { backgroundColor: C.primaryLighter },
+  langOptionText: {
+    fontFamily: Fonts.tajawal.regular,
+    fontSize: FontSize.base,
+    color: C.black,
+  },
+  langOptionTextActive: {
+    fontFamily: Fonts.tajawal.bold,
+    color: C.primary,
+  },
+  langCheck: {
+    fontSize: FontSize.base,
+    color: C.primary,
+    fontFamily: Fonts.inter.bold,
   },
 });

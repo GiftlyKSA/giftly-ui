@@ -4,6 +4,7 @@ import {
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 I18nManager.forceRTL(true);
 
@@ -17,6 +18,7 @@ export const OTPScreen: React.FC<OTPScreenProps> = ({
   phone = '05xxxxxxxx', onVerify, onResend,
 }) => {
   const { C } = useTheme();
+  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(C), [C]);
   const [otp, setOtp] = useState(['', '', '', '']);
   const inputs = useRef<(TextInput | null)[]>([]);
@@ -52,9 +54,9 @@ export const OTPScreen: React.FC<OTPScreenProps> = ({
 
       <View style={styles.content}>
         <Text style={styles.icon}>🔐</Text>
-        <Text style={styles.title}>التحقق من الرقم</Text>
+        <Text style={styles.title}>{t.otp_title}</Text>
         <Text style={styles.subtitle}>
-          أدخل رمز التحقق المرسل إلى{'\n'}
+          {t.otp_subtitle}{'\n'}
           <Text style={styles.phone}>{phone}</Text>
         </Text>
 
@@ -84,13 +86,13 @@ export const OTPScreen: React.FC<OTPScreenProps> = ({
           disabled={!isComplete}
           activeOpacity={0.85}
         >
-          <Text style={styles.verifyBtnText}>تحقق</Text>
+          <Text style={styles.verifyBtnText}>{t.otp_btn}</Text>
         </TouchableOpacity>
 
         <View style={styles.resendRow}>
-          <Text style={styles.resendText}>لم تستلم الرمز؟ </Text>
+          <Text style={styles.resendText}>{t.otp_no_code}</Text>
           <TouchableOpacity onPress={onResend}>
-            <Text style={styles.resendLink}>إعادة الإرسال</Text>
+            <Text style={styles.resendLink}>{t.otp_resend}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -120,7 +122,6 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     lineHeight: 24, marginBottom: Spacing.xxl,
   },
   phone: { fontFamily: Fonts.tajawal.bold, color: C.primary },
-  // Wrap forces LTR so digits 0→3 go left→right regardless of device RTL setting
   otpLtrWrap: { direction: 'ltr', marginBottom: Spacing.xxl },
   otpRow: { flexDirection: 'row', gap: Spacing.base },
   otpBox: {

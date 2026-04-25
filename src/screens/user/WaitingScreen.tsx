@@ -4,15 +4,9 @@ import {
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 I18nManager.forceRTL(true);
-
-const MESSAGES = [
-  { icon: '🔍', text: 'نبحث لك عن أفضل خبير هدايا...' },
-  { icon: '✨', text: 'خبراؤنا على استعداد لمساعدتك' },
-  { icon: '🎁', text: 'كل هدية رائعة تبدأ بفكرة مميزة' },
-  { icon: '📦', text: 'سيتواصل معك الخبير قريباً جداً' },
-];
 
 interface Props {
   onDone: () => void;
@@ -21,6 +15,7 @@ interface Props {
 
 export const WaitingScreen: React.FC<Props> = ({ onDone, onBackHome }) => {
   const { C } = useTheme();
+  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(C), [C]);
 
   const [msgIndex, setMsgIndex] = useState(0);
@@ -48,10 +43,10 @@ export const WaitingScreen: React.FC<Props> = ({ onDone, onBackHome }) => {
         Animated.timing(msgFade, { toValue: 0, duration: 200, useNativeDriver: true }),
         Animated.timing(msgFade, { toValue: 1, duration: 200, useNativeDriver: true }),
       ]).start();
-      setMsgIndex(i => (i + 1) % MESSAGES.length);
+      setMsgIndex(i => (i + 1) % t.wait_msgs.length);
     }, 750);
     return () => clearInterval(id);
-  }, []);
+  }, [t.wait_msgs.length]);
 
   useEffect(() => {
     const id = setTimeout(() => onDone(), 3000);
@@ -63,7 +58,7 @@ export const WaitingScreen: React.FC<Props> = ({ onDone, onBackHome }) => {
     outputRange: ['0deg', '360deg'],
   });
 
-  const { icon, text } = MESSAGES[msgIndex];
+  const { icon, text } = t.wait_msgs[msgIndex];
 
   return (
     <View style={styles.root}>
@@ -83,10 +78,8 @@ export const WaitingScreen: React.FC<Props> = ({ onDone, onBackHome }) => {
         </Animated.View>
 
         <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>لا تقلق، نحن هنا! 😊</Text>
-          <Text style={styles.infoBody}>
-            يراجع فريقنا طلبك الآن وسيتواصل معك أحد خبراء الهدايا خلال لحظات للمساعدة في اختيار الهدية المثالية.
-          </Text>
+          <Text style={styles.infoTitle}>{t.wait_title}</Text>
+          <Text style={styles.infoBody}>{t.wait_body}</Text>
         </View>
 
         <View style={styles.dotsRow}>
@@ -97,7 +90,7 @@ export const WaitingScreen: React.FC<Props> = ({ onDone, onBackHome }) => {
       </View>
 
       <TouchableOpacity style={styles.backBtn} onPress={onBackHome} activeOpacity={0.7}>
-        <Text style={styles.backText}>العودة إلى الرئيسية</Text>
+        <Text style={styles.backText}>{t.wait_back}</Text>
       </TouchableOpacity>
     </View>
   );

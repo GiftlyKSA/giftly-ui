@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 I18nManager.forceRTL(true);
 
@@ -15,6 +16,7 @@ interface LoginScreenProps {
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
   const { C } = useTheme();
+  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(C), [C]);
   const [phone, setPhone] = useState('');
 
@@ -29,11 +31,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
             <Text style={styles.logoText}>🎁</Text>
           </View>
           <Text style={styles.appName}>Giftly</Text>
-          <Text style={styles.tagline}>اختيارات تصنع لحظة لا تُنسى</Text>
+          <Text style={styles.tagline}>{t.login_tagline}</Text>
         </View>
 
         <View style={styles.fieldWrap}>
-          <Text style={styles.label}>رقم الجوال</Text>
+          <Text style={styles.label}>{t.login_phone_label}</Text>
           <View style={styles.inputRow}>
             <View style={styles.prefix}>
               <Text style={styles.prefixText}>🇸🇦 +966</Text>
@@ -57,7 +59,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
           activeOpacity={0.85}
           disabled={!phone}
         >
-          <Text style={styles.loginBtnText}>تسجيل الدخول</Text>
+          <Text style={styles.loginBtnText}>{t.login_btn}</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -85,6 +87,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontSize: FontSize.base,
     color: C.textSecondary,
     marginTop: 4,
+    textAlign: 'center',
   },
   fieldWrap: { marginBottom: Spacing.xl },
   label: {

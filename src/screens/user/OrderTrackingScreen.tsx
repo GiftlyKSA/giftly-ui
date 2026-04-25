@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, I18nManager,
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { useTopInset } from '../../hooks/useTopInset';
 
 I18nManager.forceRTL(true);
@@ -15,28 +16,33 @@ interface OrderTrackingScreenProps {
   onChat: () => void;
 }
 
-const STAGES = [
-  { id: 1, label: 'تم الاستلام', icon: '📋', done: true },
-  { id: 2, label: 'قيد التجهيز', icon: '⚙️', done: true },
-  { id: 3, label: 'جاهز للتوصيل', icon: '📦', done: true },
-  { id: 4, label: 'خرج للتوصيل', icon: '🚗', done: false, active: true },
-  { id: 5, label: 'تم التوصيل', icon: '✅', done: false },
-];
+const STAGE_ICONS = ['📋', '⚙️', '📦', '🚗', '✅'];
+const STAGE_DONE = [true, true, true, false, false];
+const STAGE_ACTIVE = [false, false, false, true, false];
 
 export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
   orderId = 'ORD-593821', onBack, onChat,
 }) => {
   const { C } = useTheme();
+  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(C), [C]);
   const topPadding = useTopInset();
+
+  const stages = t.track_stages.map((label, i) => ({
+    id: i + 1,
+    label,
+    icon: STAGE_ICONS[i],
+    done: STAGE_DONE[i],
+    active: STAGE_ACTIVE[i],
+  }));
 
   return (
     <View style={styles.root}>
       <View style={[styles.header, Shadow.header, { paddingTop: topPadding + Spacing.sm }]}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-          <Text style={styles.backIcon}>→</Text>
+          <Text style={styles.backIcon}>{t.back_arrow}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>تتبع الطلب</Text>
+        <Text style={styles.headerTitle}>{t.track_title}</Text>
         <TouchableOpacity onPress={onChat} style={styles.chatBtn}>
           <Text style={styles.chatIcon}>💬</Text>
         </TouchableOpacity>
@@ -46,24 +52,24 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
         <View style={[styles.orderIdCard, Shadow.card]}>
           <View style={styles.orderIdRow}>
             <TouchableOpacity style={styles.copyBtn}>
-              <Text style={styles.copyText}>📋 نسخ</Text>
+              <Text style={styles.copyText}>{t.track_copy}</Text>
             </TouchableOpacity>
             <Text style={styles.orderId}>{orderId}</Text>
           </View>
           <View style={styles.orderMeta}>
             <View style={styles.metaItem}>
               <Text style={styles.metaValue}>12:00 - 16:00</Text>
-              <Text style={styles.metaLabel}>⏰ وقت التوصيل</Text>
+              <Text style={styles.metaLabel}>{t.track_delivery_time}</Text>
             </View>
             <View style={styles.metaDivider} />
             <View style={styles.metaItem}>
               <Text style={styles.metaValue}>9 أبريل 2025</Text>
-              <Text style={styles.metaLabel}>📅 تاريخ الطلب</Text>
+              <Text style={styles.metaLabel}>{t.track_order_date}</Text>
             </View>
             <View style={styles.metaDivider} />
             <View style={styles.metaItem}>
               <Text style={styles.metaValue}>250 ر.س</Text>
-              <Text style={styles.metaLabel}>💰 المبلغ</Text>
+              <Text style={styles.metaLabel}>{t.track_amount}</Text>
             </View>
           </View>
         </View>
@@ -85,16 +91,16 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
         </View>
 
         <View style={[styles.timelineCard, Shadow.card]}>
-          <Text style={styles.timelineTitle}>مراحل الطلب</Text>
-          {STAGES.map((stage, idx) => (
+          <Text style={styles.timelineTitle}>{t.track_stages_title}</Text>
+          {stages.map((stage, idx) => (
             <View key={stage.id} style={styles.stageRow}>
-              {idx < STAGES.length - 1 && (
+              {idx < stages.length - 1 && (
                 <View style={[styles.stageLine, stage.done && styles.stageLineDone]} />
               )}
               <View style={[
                 styles.stageDot,
                 stage.done && styles.stageDotDone,
-                (stage as any).active && styles.stageDotActive,
+                stage.active && styles.stageDotActive,
               ]}>
                 <Text style={styles.stageDotText}>{stage.icon}</Text>
               </View>
@@ -102,12 +108,12 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
                 <Text style={[
                   styles.stageLabel,
                   stage.done && styles.stageLabelDone,
-                  (stage as any).active && styles.stageLabelActive,
+                  stage.active && styles.stageLabelActive,
                 ]}>
                   {stage.label}
                 </Text>
-                {(stage as any).active && (
-                  <Text style={styles.stageSubLabel}>جاري التوصيل الآن...</Text>
+                {stage.active && (
+                  <Text style={styles.stageSubLabel}>{t.track_delivering_now}</Text>
                 )}
               </View>
             </View>
@@ -117,17 +123,17 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
         <View style={[styles.mapCard, Shadow.card]}>
           <View style={styles.mapPlaceholder}>
             <Text style={styles.mapEmoji}>🗺️</Text>
-            <Text style={styles.mapText}>تتبع الموقع المباشر</Text>
-            <Text style={styles.mapSub}>سيظهر هنا موقع المندوب</Text>
+            <Text style={styles.mapText}>{t.track_live}</Text>
+            <Text style={styles.mapSub}>{t.track_live_sub}</Text>
           </View>
         </View>
 
         <View style={styles.actions}>
           <TouchableOpacity style={styles.cancelBtn}>
-            <Text style={styles.cancelBtnText}>إلغاء الطلب</Text>
+            <Text style={styles.cancelBtnText}>{t.track_cancel}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.chatActionBtn} onPress={onChat}>
-            <Text style={styles.chatActionText}>💬 تواصل مع الخبير</Text>
+            <Text style={styles.chatActionText}>{t.track_chat}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>

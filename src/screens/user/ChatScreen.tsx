@@ -6,6 +6,7 @@ import {
 } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { useTopInset } from '../../hooks/useTopInset';
 
 I18nManager.forceRTL(true);
@@ -36,6 +37,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   onBack, agentName = 'أحمد محمد', orderId = 'ORD-593821',
 }) => {
   const { C } = useTheme();
+  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(C), [C]);
   const topPadding = useTopInset();
 
@@ -61,11 +63,11 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
     <View style={styles.root}>
       <View style={[styles.header, Shadow.header, { paddingTop: topPadding + Spacing.sm }]}>
         <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-          <Text style={styles.backIcon}>→</Text>
+          <Text style={styles.backIcon}>{t.back_arrow}</Text>
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerName}>{agentName}</Text>
-          <Text style={styles.headerSub}>{orderId} · متصل الآن</Text>
+          <Text style={styles.headerSub}>{orderId} · {t.chat_online}</Text>
         </View>
         <View style={styles.headerAvatar}>
           <Text style={styles.headerAvatarText}>خ</Text>
@@ -97,7 +99,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
             style={styles.input}
             value={input}
             onChangeText={setInput}
-            placeholder="اكتب رسالتك..."
+            placeholder={t.chat_ph}
             placeholderTextColor={C.gray500}
             textAlign="right"
             multiline

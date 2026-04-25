@@ -7,6 +7,7 @@ import {
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { useTopInset } from '../../hooks/useTopInset';
 
 I18nManager.forceRTL(true);
@@ -30,6 +31,7 @@ interface Props {
 
 export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
   const { C } = useTheme();
+  const { t } = useLanguage();
   const styles = useMemo(() => createStyles(C), [C]);
   const topPadding = useTopInset();
 
@@ -58,9 +60,9 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
     >
       <View style={[styles.header, Shadow.header, { paddingTop: topPadding + Spacing.sm }]}>
         <TouchableOpacity style={styles.backBtn} onPress={onBack}>
-          <Text style={styles.backIcon}>→</Text>
+          <Text style={styles.backIcon}>{t.back_arrow}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>طلب جديد</Text>
+        <Text style={styles.headerTitle}>{t.create_title}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -71,22 +73,19 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
       >
         <View style={styles.hintCard}>
           <Text style={styles.hintIcon}>💡</Text>
-          <Text style={styles.hintText}>
-            لا تعرف ماذا تطلب؟ أخبرنا عن المناسبة فقط وسيساعدك خبراؤنا في اختيار الهدية المثالية!
-          </Text>
+          <Text style={styles.hintText}>{t.create_hint}</Text>
         </View>
 
-        {/* Description - optional */}
         <View style={styles.fieldWrap}>
           <View style={styles.labelRow}>
-            <Text style={styles.optionalTag}>اختياري</Text>
-            <Text style={styles.label}>وصف الطلب</Text>
+            <Text style={styles.optionalTag}>{t.create_optional}</Text>
+            <Text style={styles.label}>{t.create_desc}</Text>
           </View>
           <TextInput
             style={styles.textArea}
             value={description}
             onChangeText={setDescription}
-            placeholder={'اكتب تفاصيل المناسبة أو ما تريد إهداءه...\nمثال: هدية عيد ميلاد لصديق عمره ٢٥ سنة'}
+            placeholder={t.create_desc_ph}
             multiline
             numberOfLines={4}
             textAlignVertical="top"
@@ -95,9 +94,8 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
           />
         </View>
 
-        {/* City */}
         <View style={styles.fieldWrap}>
-          <Text style={styles.label}>المدينة</Text>
+          <Text style={styles.label}>{t.create_city}</Text>
           <TouchableOpacity
             style={styles.selectBtn}
             onPress={() => setShowCityModal(true)}
@@ -105,14 +103,13 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
           >
             <Text style={styles.selectArrow}>▾</Text>
             <Text style={[styles.selectText, !city && styles.placeholder]}>
-              {city || 'اختر المدينة'}
+              {city || t.create_city_ph}
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Delivery Date */}
         <View style={styles.fieldWrap}>
-          <Text style={styles.label}>تاريخ التسليم</Text>
+          <Text style={styles.label}>{t.create_date}</Text>
           <TouchableOpacity
             style={styles.selectBtn}
             onPress={() => {
@@ -123,7 +120,7 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
           >
             <Text style={styles.calIcon}>📅</Text>
             <Text style={[styles.selectText, !deliveryDate && styles.placeholder]}>
-              {deliveryDate ? formatDate(deliveryDate) : 'اختر تاريخ التسليم'}
+              {deliveryDate ? formatDate(deliveryDate) : t.create_date_ph}
             </Text>
           </TouchableOpacity>
         </View>
@@ -144,7 +141,7 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
           onPress={canSubmit ? onSubmit : undefined}
           activeOpacity={0.85}
         >
-          <Text style={styles.submitBtnText}>إرسال الطلب</Text>
+          <Text style={styles.submitBtnText}>{t.create_submit}</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -160,9 +157,9 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
             <View style={styles.modalHandle} />
             <View style={styles.modalHeader}>
               <TouchableOpacity onPress={() => setShowCityModal(false)}>
-                <Text style={styles.modalClose}>✕</Text>
+                <Text style={styles.modalClose}>{t.btn_close}</Text>
               </TouchableOpacity>
-              <Text style={styles.modalTitle}>اختر المدينة</Text>
+              <Text style={styles.modalTitle}>{t.create_city_modal}</Text>
               <View style={{ width: 24 }} />
             </View>
             <FlatList
@@ -199,11 +196,11 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
               <View style={styles.modalHandle} />
               <View style={styles.modalHeader}>
                 <TouchableOpacity onPress={() => setShowDatePicker(false)}>
-                  <Text style={styles.modalCancel}>إلغاء</Text>
+                  <Text style={styles.modalCancel}>{t.btn_cancel}</Text>
                 </TouchableOpacity>
-                <Text style={styles.modalTitle}>تاريخ التسليم</Text>
+                <Text style={styles.modalTitle}>{t.create_date_modal}</Text>
                 <TouchableOpacity onPress={() => { setDeliveryDate(tempDate); setShowDatePicker(false); }}>
-                  <Text style={styles.modalDone}>تم</Text>
+                  <Text style={styles.modalDone}>{t.btn_done}</Text>
                 </TouchableOpacity>
               </View>
               <DateTimePicker
@@ -225,7 +222,6 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
 
 const createStyles = (C: ThemeColors) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bgPage },
-
   header: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
@@ -242,9 +238,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontSize: FontSize.lg,
     color: C.black,
   },
-
   scroll: { padding: Spacing.xl, paddingBottom: 40 },
-
   hintCard: {
     flexDirection: 'row-reverse',
     alignItems: 'flex-start',
@@ -265,7 +259,6 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     textAlign: 'right',
     lineHeight: 20,
   },
-
   fieldWrap: { marginBottom: Spacing.xl },
   labelRow: {
     flexDirection: 'row-reverse',
@@ -321,7 +314,6 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
   placeholder: { color: C.gray500 },
   selectArrow: { fontSize: 14, color: C.gray500, marginLeft: 4 },
   calIcon: { fontSize: 18, marginLeft: 4 },
-
   submitBtn: {
     backgroundColor: C.primary,
     borderRadius: Radius.lg,
@@ -336,7 +328,6 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     fontSize: FontSize.md,
     color: '#FFFFFF',
   },
-
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
