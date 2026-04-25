@@ -13,7 +13,14 @@
       "mcp__figma__figma_get_nodes",
       "Bash(git init *)",
       "Bash(git branch *)",
-      "Bash(git remote *)"
+      "Bash(git remote *)",
+      "WebSearch",
+      "WebFetch(domain:expo.dev)",
+      "WebFetch(domain:docs.expo.dev)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:reactnavigation.org)"
     ]
   }
 }
