@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { I18nManager } from 'react-native';
+import OnboardingScreen from '../screens/auth/OnboardingScreen';
 import { LoginScreen } from '../screens/auth/LoginScreen';
 import { RegisterScreen } from '../screens/auth/RegisterScreen';
 import { OTPScreen } from '../screens/auth/OTPScreen';
 import { UserHomeScreen } from '../screens/user/UserHomeScreen';
 import { AgentHomeScreen } from '../screens/agent/AgentHomeScreen';
+import { CreateOrderScreen } from '../screens/user/CreateOrderScreen';
+import { WaitingScreen } from '../screens/user/WaitingScreen';
 import { OrderTrackingScreen } from '../screens/user/OrderTrackingScreen';
 import { OrdersScreen } from '../screens/user/OrdersScreen';
 import { ChatScreen } from '../screens/user/ChatScreen';
@@ -13,8 +16,9 @@ import { ProfileScreen } from '../screens/user/ProfileScreen';
 I18nManager.forceRTL(true);
 
 type Screen =
-  | 'login' | 'register' | 'otp'
+  | 'onboarding' | 'login' | 'register' | 'otp'
   | 'user-home' | 'agent-home'
+  | 'create-order' | 'waiting'
   | 'user-orders' | 'agent-orders'
   | 'order-tracking' | 'chat'
   | 'user-profile' | 'agent-profile';
@@ -25,23 +29,39 @@ interface NavState {
 }
 
 export const RootNavigator: React.FC = () => {
-  const [nav, setNav] = useState<NavState>({ screen: 'login' });
-  const [role, setRole] = useState<'user' | 'agent'>('user');
+  const [nav, setNav] = useState<NavState>({ screen: 'onboarding' });
+  const [role, setRole] = useState<'user' | 'agent' | 'new'>('new');
+  const [loginPhone, setLoginPhone] = useState('');
 
   const go = (screen: Screen, params?: Record<string, string>) =>
     setNav({ screen, params });
 
-  const handleLogin = (r: 'user' | 'agent') => {
-    setRole(r);
+  const handleLogin = (phone: string) => {
+    const stripped = phone.replace(/\s/g, '');
+    setLoginPhone(stripped);
+    if (stripped === '555555555') {
+      setRole('user');
+    } else if (stripped === '555555558') {
+      setRole('agent');
+    } else {
+      setRole('new');
+    }
     go('otp');
   };
 
   const handleOtpVerify = () => {
-    go(role === 'agent' ? 'agent-home' : 'user-home');
+    if (role === 'agent') go('agent-home');
+    else if (role === 'user') go('user-home');
+    else go('register'); // new user → fill registration form after OTP
   };
 
   const handleTabPress = (route: string) => {
-    if (role === 'user') {
+    if (route === 'new-order') {
+      go('create-order');
+      return;
+    }
+    const r = role === 'agent' ? 'agent' : 'user';
+    if (r === 'user') {
       if (route === 'home') go('user-home');
       else if (route === 'orders') go('user-orders');
       else if (route === 'chat') go('chat');
@@ -55,11 +75,20 @@ export const RootNavigator: React.FC = () => {
 
   const { screen, params } = nav;
 
+  if (screen === 'onboarding') {
+    return <OnboardingScreen onFinish={() => go('login')} />;
+  }
+
   if (screen === 'login') {
+    return <LoginScreen onLogin={handleLogin} />;
+  }
+
+  if (screen === 'otp') {
     return (
-      <LoginScreen
-        onLogin={handleLogin}
-        onGoRegister={() => go('register')}
+      <OTPScreen
+        phone={`+966 ${loginPhone}`}
+        onVerify={handleOtpVerify}
+        onResend={() => {}}
       />
     );
   }
@@ -67,17 +96,8 @@ export const RootNavigator: React.FC = () => {
   if (screen === 'register') {
     return (
       <RegisterScreen
-        onRegister={() => go('otp')}
+        onRegister={() => { setRole('user'); go('user-home'); }}
         onGoLogin={() => go('login')}
-      />
-    );
-  }
-
-  if (screen === 'otp') {
-    return (
-      <OTPScreen
-        onVerify={handleOtpVerify}
-        onResend={() => {}}
       />
     );
   }
@@ -96,6 +116,24 @@ export const RootNavigator: React.FC = () => {
       <AgentHomeScreen
         onOrderPress={id => go('order-tracking', { orderId: id })}
         onTabPress={handleTabPress}
+      />
+    );
+  }
+
+  if (screen === 'create-order') {
+    return (
+      <CreateOrderScreen
+        onSubmit={() => go('waiting')}
+        onBack={() => go('user-home')}
+      />
+    );
+  }
+
+  if (screen === 'waiting') {
+    return (
+      <WaitingScreen
+        onDone={() => go('chat')}
+        onBackHome={() => go('user-home')}
       />
     );
   }

@@ -1,6 +1,8 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
-import { Colors, Spacing, Radius, Shadow, Fonts, FontSize } from '../constants/colors';
+import React, { useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ThemeColors, Shadow, Spacing, Radius, Fonts, FontSize } from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 
 interface AppHeaderProps {
   userName: string;
@@ -12,18 +14,18 @@ interface AppHeaderProps {
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
-  userName,
-  balance,
-  isAgent = false,
-  rating,
-  onProfilePress,
-  onNotificationPress,
+  userName, balance, isAgent = false, rating, onProfilePress, onNotificationPress,
 }) => {
-  return (
-    <View style={[styles.header, Shadow.header]}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.white} />
+  const { C } = useTheme();
+  const { top } = useSafeAreaInsets();
+  const topPadding = Platform.OS === 'ios' ? top : (StatusBar.currentHeight ?? 0);
+  const styles = useMemo(() => createStyles(C), [C]);
 
-      {/* Left: balance or analytics icon */}
+  return (
+    <View style={[styles.header, Shadow.header, { paddingTop: topPadding + Spacing.sm }]}>
+      <StatusBar barStyle={C.black === '#000000' ? 'dark-content' : 'light-content'}
+        backgroundColor={C.white} translucent={Platform.OS === 'android'} />
+
       <View style={styles.left}>
         {isAgent ? (
           <TouchableOpacity style={styles.iconBtn} onPress={onNotificationPress}>
@@ -37,7 +39,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
         ) : null}
       </View>
 
-      {/* Right: Avatar + Name */}
       <TouchableOpacity style={styles.profileRow} onPress={onProfilePress}>
         <View style={styles.textCol}>
           <Text style={styles.greeting}>اهلاً، {userName}</Text>
@@ -57,61 +58,37 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (C: ThemeColors) => StyleSheet.create({
   header: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.lg,
     paddingBottom: Spacing.base,
     borderBottomLeftRadius: Radius.lg,
     borderBottomRightRadius: Radius.lg,
   },
   left: { alignItems: 'flex-start' },
   balanceRow: { flexDirection: 'row', alignItems: 'center' },
-  balanceAmount: {
-    fontFamily: Fonts.tajawal.bold,
-    fontSize: 22,
-    color: Colors.primary,
-  },
-  balanceCurrency: {
-    fontFamily: Fonts.tajawal.bold,
-    fontSize: FontSize.base,
-    color: Colors.primary,
-  },
+  balanceAmount: { fontFamily: Fonts.tajawal.bold, fontSize: 22, color: C.primary },
+  balanceCurrency: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.base, color: C.primary },
   profileRow: { flexDirection: 'row-reverse', alignItems: 'center', gap: Spacing.sm },
   textCol: { alignItems: 'flex-end' },
-  greeting: {
-    fontFamily: Fonts.tajawal.bold,
-    fontSize: FontSize.base,
-    color: Colors.black,
-    textAlign: 'right',
-  },
+  greeting: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.base, color: C.black, textAlign: 'right' },
   starsRow: { flexDirection: 'row', gap: 2, marginTop: 2 },
-  star: { fontSize: 10, color: Colors.gray300 },
+  star: { fontSize: 10, color: C.gray300 },
   starFilled: { color: '#FFB800' },
   avatar: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 46, height: 46, borderRadius: 23,
+    backgroundColor: C.primaryLight,
+    alignItems: 'center', justifyContent: 'center',
   },
-  avatarText: {
-    fontFamily: Fonts.tajawal.bold,
-    fontSize: FontSize.lg,
-    color: Colors.primary,
-  },
+  avatarText: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.lg, color: C.primary },
   iconBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: Radius.md,
-    backgroundColor: 'rgba(209,209,214,0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 34, height: 34, borderRadius: Radius.md,
+    backgroundColor: C.gray100,
+    alignItems: 'center', justifyContent: 'center',
   },
   iconText: { fontSize: 16 },
 });

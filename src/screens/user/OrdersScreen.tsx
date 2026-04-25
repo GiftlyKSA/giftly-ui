@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, FlatList,
   TouchableOpacity, I18nManager,
 } from 'react-native';
-import { Colors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
+import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
+import { useTopInset } from '../../hooks/useTopInset';
 import { OrderCard } from '../../components/OrderCard';
 import { BottomTabBar } from '../../components/BottomTabBar';
 
@@ -25,10 +27,12 @@ const ALL_ORDERS = [
 const FILTERS = ['الكل', 'نشط', 'مكتمل', 'ملغي'];
 
 export const OrdersScreen: React.FC<OrdersScreenProps> = ({
-  isAgent = false,
-  onOrderPress,
-  onTabPress,
+  isAgent = false, onOrderPress, onTabPress,
 }) => {
+  const { C } = useTheme();
+  const styles = useMemo(() => createStyles(C), [C]);
+  const topPadding = useTopInset();
+
   const [activeFilter, setActiveFilter] = useState('الكل');
   const [activeTab, setActiveTab] = useState('orders');
 
@@ -47,12 +51,10 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({
 
   return (
     <View style={styles.root}>
-      {/* Header */}
-      <View style={[styles.header, Shadow.header]}>
-        <Text style={styles.headerTitle}>{isAgent ? 'طلباتي' : 'طلباتي'}</Text>
+      <View style={[styles.header, Shadow.header, { paddingTop: topPadding + Spacing.sm }]}>
+        <Text style={styles.headerTitle}>طلباتي</Text>
       </View>
 
-      {/* Filters */}
       <View style={styles.filtersWrap}>
         <FlatList
           horizontal
@@ -74,14 +76,10 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({
         />
       </View>
 
-      {/* Summary */}
       <View style={styles.summary}>
-        <Text style={styles.summaryText}>
-          {filteredOrders.length} طلب
-        </Text>
+        <Text style={styles.summaryText}>{filteredOrders.length} طلب</Text>
       </View>
 
-      {/* Orders list */}
       <FlatList
         data={filteredOrders}
         keyExtractor={o => o.id}
@@ -111,12 +109,11 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.bgPage },
+const createStyles = (C: ThemeColors) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: C.bgPage },
   header: {
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.xxxl,
     paddingBottom: Spacing.base,
     borderBottomLeftRadius: Radius.lg,
     borderBottomRightRadius: Radius.lg,
@@ -125,24 +122,24 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.lg,
-    color: Colors.black,
+    color: C.black,
   },
   filtersWrap: { paddingVertical: Spacing.base },
   filterBtn: {
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.sm,
     borderRadius: Radius.xxl,
-    backgroundColor: Colors.gray100,
+    backgroundColor: C.gray100,
   },
-  filterBtnActive: { backgroundColor: Colors.primary },
+  filterBtnActive: { backgroundColor: C.primary },
   filterText: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   filterTextActive: {
     fontFamily: Fonts.tajawal.bold,
-    color: Colors.white,
+    color: '#FFFFFF',
   },
   summary: {
     paddingHorizontal: Spacing.xl,
@@ -152,7 +149,7 @@ const styles = StyleSheet.create({
   summaryText: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   list: { paddingHorizontal: Spacing.xl, paddingBottom: 100 },
   emptyWrap: { alignItems: 'center', paddingTop: Spacing.xxxl * 2 },
@@ -160,12 +157,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.lg,
-    color: Colors.black,
+    color: C.black,
     marginBottom: Spacing.xs,
   },
   emptySubtitle: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
 });

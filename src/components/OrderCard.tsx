@@ -1,14 +1,8 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  I18nManager,
-} from 'react-native';
-import { Colors, Spacing, Radius, Shadow, Fonts, FontSize } from '../constants/colors';
+import React, { useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, I18nManager } from 'react-native';
+import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 
-// Force RTL
 I18nManager.forceRTL(true);
 
 interface OrderCardProps {
@@ -21,34 +15,29 @@ interface OrderCardProps {
   onViewDetails?: () => void;
 }
 
-const statusConfig = {
-  preparing: { label: 'قيد التجهيز', color: Colors.info, bg: Colors.infoBg },
-  delivering: { label: 'خرج للتوصيل', color: '#4CAF50', bg: 'rgba(76,175,80,0.2)' },
-  delivered: { label: 'تم التوصيل', color: Colors.teal, bg: 'rgba(38,143,133,0.2)' },
-  cancelled: { label: 'ملغي', color: Colors.error, bg: 'rgba(219,13,13,0.1)' },
-};
-
 export const OrderCard: React.FC<OrderCardProps> = ({
-  orderId,
-  eventName,
-  status,
-  time,
-  messageCount = 0,
-  onPress,
-  onViewDetails,
+  orderId, eventName, status, time, messageCount = 0, onPress, onViewDetails,
 }) => {
+  const { C } = useTheme();
+  const styles = useMemo(() => createStyles(C), [C]);
+
+  const statusConfig = {
+    preparing: { label: 'قيد التجهيز', color: C.info, bg: C.infoBg },
+    delivering: { label: 'خرج للتوصيل', color: '#4CAF50', bg: 'rgba(76,175,80,0.2)' },
+    delivered: { label: 'تم التوصيل', color: C.teal, bg: 'rgba(38,143,133,0.2)' },
+    cancelled: { label: 'ملغي', color: C.error, bg: 'rgba(219,13,13,0.1)' },
+  };
+
   const cfg = statusConfig[status];
 
   return (
     <TouchableOpacity style={[styles.card, Shadow.card]} onPress={onPress} activeOpacity={0.85}>
-      {/* Icon */}
       <View style={styles.iconWrap}>
         <View style={styles.iconCircle}>
           <Text style={styles.iconEmoji}>🎁</Text>
         </View>
       </View>
 
-      {/* Content */}
       <View style={styles.content}>
         <Text style={styles.orderId}>{orderId}</Text>
         <Text style={styles.eventName}>{eventName}</Text>
@@ -58,7 +47,6 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* Right side */}
       <View style={styles.right}>
         <View style={[styles.statusBadge, { backgroundColor: cfg.bg }]}>
           <Text style={[styles.statusText, { color: cfg.color }]}>{cfg.label}</Text>
@@ -74,50 +62,47 @@ export const OrderCard: React.FC<OrderCardProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (C: ThemeColors) => StyleSheet.create({
   card: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     borderRadius: Radius.lg,
     borderWidth: 3,
-    borderColor: Colors.primaryLight,
+    borderColor: C.primaryLight,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
   },
   iconWrap: { marginLeft: Spacing.sm },
   iconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: Radius.md,
-    backgroundColor: 'rgba(201,174,236,0.2)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 40, height: 40, borderRadius: Radius.md,
+    backgroundColor: C.primaryLighter,
+    alignItems: 'center', justifyContent: 'center',
   },
   iconEmoji: { fontSize: 18 },
   content: { flex: 1, alignItems: 'flex-end' },
   orderId: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.base,
-    color: Colors.black,
+    color: C.black,
     textAlign: 'right',
   },
   eventName: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     textAlign: 'right',
   },
   time: {
     fontFamily: Fonts.inter.regular,
     fontSize: FontSize.xs,
-    color: Colors.gray500,
+    color: C.gray500,
     marginTop: 2,
   },
   viewDetails: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.sm,
-    color: Colors.black,
+    color: C.black,
     textDecorationLine: 'underline',
     marginTop: 2,
   },
@@ -134,7 +119,7 @@ const styles = StyleSheet.create({
   messageBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(209,209,214,0.15)',
+    backgroundColor: C.gray200,
     borderRadius: 13,
     paddingHorizontal: 6,
     paddingVertical: 3,
@@ -144,6 +129,6 @@ const styles = StyleSheet.create({
   messageCount: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
 });

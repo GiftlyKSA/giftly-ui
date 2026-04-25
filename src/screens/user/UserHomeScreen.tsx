@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, FlatList, I18nManager,
 } from 'react-native';
-import { Colors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
+import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import { AppHeader } from '../../components/AppHeader';
 import { OrderCard } from '../../components/OrderCard';
 import { BottomTabBar } from '../../components/BottomTabBar';
@@ -29,62 +30,64 @@ const ORDERS = [
 const WEEK_DAYS = ['الأح', 'الإث', 'الثل', 'الأر', 'الخم', 'الجم', 'الس'];
 const WEEK_DATES = [9, 10, 11, 12, 13, 14, 15];
 
-const GiftCard: React.FC<{ title: string; price: string; tag: string }> = ({ title, price, tag }) => (
-  <View style={giftCardStyles.card}>
-    <View style={giftCardStyles.img}>
-      <Text style={giftCardStyles.imgEmoji}>🎁</Text>
+const GiftCard: React.FC<{ title: string; price: string; tag: string }> = ({ title, price, tag }) => {
+  const { C } = useTheme();
+  const styles = useMemo(() => createGiftCardStyles(C), [C]);
+  return (
+    <View style={styles.card}>
+      <View style={styles.img}>
+        <Text style={styles.imgEmoji}>🎁</Text>
+      </View>
+      <View style={styles.tagWrap}>
+        <Text style={styles.tag}>{tag}</Text>
+      </View>
+      <Text style={styles.title} numberOfLines={2}>{title}</Text>
+      <Text style={styles.price}>{price} ر.س</Text>
     </View>
-    <View style={giftCardStyles.tagWrap}>
-      <Text style={giftCardStyles.tag}>{tag}</Text>
-    </View>
-    <Text style={giftCardStyles.title} numberOfLines={2}>{title}</Text>
-    <Text style={giftCardStyles.price}>{price} ر.س</Text>
-  </View>
-);
+  );
+};
 
-const giftCardStyles = StyleSheet.create({
+const createGiftCardStyles = (C: ThemeColors) => StyleSheet.create({
   card: {
     width: 160,
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     borderRadius: Radius.xl,
     marginLeft: Spacing.base,
     padding: Spacing.sm,
     ...Shadow.card,
   },
   img: {
-    height: 120,
-    borderRadius: Radius.lg,
-    backgroundColor: Colors.primaryLighter,
-    alignItems: 'center',
-    justifyContent: 'center',
+    height: 120, borderRadius: Radius.lg,
+    backgroundColor: C.primaryLighter,
+    alignItems: 'center', justifyContent: 'center',
     marginBottom: Spacing.sm,
   },
   imgEmoji: { fontSize: 48 },
   tagWrap: {
-    backgroundColor: Colors.primaryLighter,
+    backgroundColor: C.primaryLighter,
     borderRadius: Radius.sm,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    alignSelf: 'flex-end',
-    marginBottom: 4,
+    paddingHorizontal: 8, paddingVertical: 3,
+    alignSelf: 'flex-end', marginBottom: 4,
   },
-  tag: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.xs, color: Colors.primary },
+  tag: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.xs, color: C.primary },
   title: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.sm,
-    color: Colors.black,
+    color: C.black,
     textAlign: 'right',
     marginBottom: 4,
   },
   price: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.base,
-    color: Colors.primary,
+    color: C.primary,
     textAlign: 'right',
   },
 });
 
 export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, onTabPress }) => {
+  const { C } = useTheme();
+  const styles = useMemo(() => createStyles(C), [C]);
   const [activeDay, setActiveDay] = useState(0);
   const [activeTab, setActiveTab] = useState('home');
 
@@ -98,13 +101,10 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
       <AppHeader userName="محمد" balance="1,321" onProfilePress={() => {}} />
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-
-        {/* Hero text */}
         <View style={styles.heroSection}>
           <Text style={styles.heroText}>اختيارات{'\n'}تصنع لحظة لا تُنسى</Text>
         </View>
 
-        {/* Gift Cards Carousel */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <TouchableOpacity><Text style={styles.seeAll}>عرض الكل</Text></TouchableOpacity>
@@ -125,7 +125,6 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
           />
         </View>
 
-        {/* Weekly Calendar */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <TouchableOpacity><Text style={styles.seeAll}>التقويم الكامل</Text></TouchableOpacity>
@@ -145,12 +144,11 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
           </View>
         </View>
 
-        {/* Upcoming events */}
         <View style={styles.section}>
           {UPCOMING_EVENTS.map(event => (
             <View key={event.id} style={styles.eventCard}>
               <View style={styles.eventLeft}>
-                <View style={[styles.prepBtn]}>
+                <View style={styles.prepBtn}>
                   <Text style={styles.prepBtnText}>جهّز هديتك</Text>
                 </View>
               </View>
@@ -168,7 +166,6 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
           ))}
         </View>
 
-        {/* Registered Orders */}
         <View style={styles.section}>
           <View style={[styles.ordersCard, Shadow.card]}>
             <Text style={styles.ordersTitle}>طلبات مسجلة</Text>
@@ -193,14 +190,14 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
   );
 };
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.bgPage },
+const createStyles = (C: ThemeColors) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: C.bgPage },
   scroll: { flex: 1 },
   heroSection: { paddingHorizontal: Spacing.xl, paddingVertical: Spacing.xl },
   heroText: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.xxxl,
-    color: Colors.black,
+    color: C.black,
     textAlign: 'right',
     lineHeight: 36,
   },
@@ -214,17 +211,17 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.md,
-    color: Colors.black,
+    color: C.black,
   },
   seeAll: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.sm,
-    color: Colors.primary,
+    color: C.primary,
   },
   weekRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: Colors.gray100,
+    backgroundColor: C.gray100,
     borderRadius: Radius.xl,
     padding: Spacing.xs,
   },
@@ -234,38 +231,35 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     borderRadius: Radius.lg,
   },
-  dayColActive: { backgroundColor: Colors.primary },
+  dayColActive: { backgroundColor: C.primary },
   dayLabel: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.xs,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     marginBottom: 2,
   },
-  dayLabelActive: { color: Colors.white },
+  dayLabelActive: { color: '#FFFFFF' },
   dayNum: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.sm,
-    color: Colors.black,
+    color: C.black,
   },
-  dayNumActive: { color: Colors.white },
+  dayNumActive: { color: '#FFFFFF' },
   eventCard: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     borderRadius: Radius.lg,
     borderWidth: 3,
-    borderColor: Colors.primary,
+    borderColor: C.primary,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
     ...Shadow.card,
   },
   eventIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: Radius.md,
-    backgroundColor: Colors.primaryLighter,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 40, height: 40, borderRadius: Radius.md,
+    backgroundColor: C.primaryLighter,
+    alignItems: 'center', justifyContent: 'center',
     marginLeft: Spacing.sm,
   },
   eventIcon: { fontSize: 20 },
@@ -273,23 +267,23 @@ const styles = StyleSheet.create({
   eventTitle: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.base,
-    color: Colors.black,
+    color: C.black,
     textAlign: 'right',
   },
   eventTimeRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
   eventDate: {
     fontFamily: Fonts.inter.regular,
     fontSize: FontSize.xs,
-    color: Colors.gray500,
+    color: C.gray500,
   },
   eventDays: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.xs,
-    color: Colors.primary,
+    color: C.primary,
   },
   eventLeft: { marginRight: Spacing.xs },
   prepBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     borderRadius: Radius.sm,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 5,
@@ -297,17 +291,17 @@ const styles = StyleSheet.create({
   prepBtnText: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.xs,
-    color: Colors.white,
+    color: '#FFFFFF',
   },
   ordersCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     borderRadius: Radius.xl,
     padding: Spacing.base,
   },
   ordersTitle: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.md,
-    color: Colors.primary,
+    color: C.primary,
     textAlign: 'right',
     marginBottom: Spacing.base,
   },

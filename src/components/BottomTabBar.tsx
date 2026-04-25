@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { Colors, Spacing, Shadow, Fonts, FontSize } from '../constants/colors';
+import { ThemeColors, Spacing, Shadow, Fonts, FontSize } from '../constants/colors';
+import { useTheme } from '../context/ThemeContext';
 
 interface TabItem {
   icon: string;
@@ -33,8 +34,9 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
   onTabPress,
   isAgent = false,
 }) => {
+  const { C } = useTheme();
+  const styles = useMemo(() => createStyles(C), [C]);
   const tabs = isAgent ? agentTabs : userTabs;
-  const centerIndex = 1; // the "plus" button index (between tab 1 and 2)
 
   return (
     <View style={styles.container}>
@@ -43,7 +45,6 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
           const isActive = activeRoute === tab.route;
           return (
             <React.Fragment key={tab.route}>
-              {/* Insert FAB between index 1 and 2 */}
               {idx === 2 && <View style={styles.fabPlaceholder} />}
               <TouchableOpacity
                 style={styles.tab}
@@ -61,7 +62,6 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
         })}
       </View>
 
-      {/* Center FAB */}
       <View style={styles.fabWrap}>
         <TouchableOpacity style={styles.fab} activeOpacity={0.85} onPress={() => onTabPress('new-order')}>
           <Text style={styles.fabIcon}>+</Text>
@@ -71,12 +71,10 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (C: ThemeColors) => StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: 0, left: 0, right: 0,
     alignItems: 'center',
     paddingBottom: 20,
     paddingHorizontal: 16,
@@ -84,7 +82,7 @@ const styles = StyleSheet.create({
   bar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     borderRadius: 50,
     paddingHorizontal: 8,
     paddingVertical: 8,
@@ -102,20 +100,18 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.xs,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     marginTop: 2,
   },
   tabLabelActive: {
-    color: Colors.primary,
+    color: C.primary,
     fontFamily: Fonts.tajawal.bold,
   },
   activeIndicator: {
     position: 'absolute',
     bottom: -4,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: Colors.primary,
+    width: 4, height: 4, borderRadius: 2,
+    backgroundColor: C.primary,
   },
   fabPlaceholder: { width: 68 },
   fabWrap: {
@@ -124,16 +120,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   fab: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    backgroundColor: Colors.black,
+    width: 58, height: 58, borderRadius: 29,
+    backgroundColor: C.primary,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadow.fab,
   },
   fabIcon: {
-    color: Colors.white,
+    color: '#FFFFFF',
     fontSize: 28,
     fontWeight: '300',
     lineHeight: 32,

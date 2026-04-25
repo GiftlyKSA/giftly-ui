@@ -1,9 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
-  View, Text, StyleSheet, TouchableOpacity,
-  TextInput, I18nManager,
+  View, Text, StyleSheet, TouchableOpacity, TextInput, I18nManager,
 } from 'react-native';
-import { Colors, Spacing, Radius, Fonts, FontSize } from '../../constants/colors';
+import { ThemeColors, Spacing, Radius, Fonts, FontSize } from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 
 I18nManager.forceRTL(true);
 
@@ -14,26 +14,40 @@ interface OTPScreenProps {
 }
 
 export const OTPScreen: React.FC<OTPScreenProps> = ({
-  phone = '05xxxxxxxx',
-  onVerify,
-  onResend,
+  phone = '05xxxxxxxx', onVerify, onResend,
 }) => {
+  const { C } = useTheme();
+  const styles = useMemo(() => createStyles(C), [C]);
   const [otp, setOtp] = useState(['', '', '', '']);
   const inputs = useRef<(TextInput | null)[]>([]);
 
   const handleChange = (val: string, idx: number) => {
+    const digit = val.replace(/[^0-9]/g, '').slice(-1);
     const updated = [...otp];
-    updated[idx] = val.slice(-1);
+    updated[idx] = digit;
     setOtp(updated);
-    if (val && idx < 3) inputs.current[idx + 1]?.focus();
-    if (!val && idx > 0) inputs.current[idx - 1]?.focus();
+    if (digit && idx < 3) inputs.current[idx + 1]?.focus();
+  };
+
+  const handleKeyPress = (key: string, idx: number) => {
+    if (key === 'Backspace') {
+      if (otp[idx]) {
+        const updated = [...otp];
+        updated[idx] = '';
+        setOtp(updated);
+      } else if (idx > 0) {
+        inputs.current[idx - 1]?.focus();
+        const updated = [...otp];
+        updated[idx - 1] = '';
+        setOtp(updated);
+      }
+    }
   };
 
   const isComplete = otp.every(d => d !== '');
 
   return (
     <View style={styles.root}>
-      {/* Top purple arc */}
       <View style={styles.topArc} />
 
       <View style={styles.content}>
@@ -44,20 +58,24 @@ export const OTPScreen: React.FC<OTPScreenProps> = ({
           <Text style={styles.phone}>{phone}</Text>
         </Text>
 
-        {/* OTP Inputs */}
-        <View style={styles.otpRow}>
-          {otp.map((digit, idx) => (
-            <TextInput
-              key={idx}
-              ref={r => (inputs.current[idx] = r)}
-              style={[styles.otpBox, digit && styles.otpBoxFilled]}
-              value={digit}
-              onChangeText={v => handleChange(v, idx)}
-              keyboardType="number-pad"
-              maxLength={1}
-              textAlign="center"
-            />
-          ))}
+        {/* OTP boxes — forced LTR so box 0 is always on the left */}
+        <View style={styles.otpLtrWrap}>
+          <View style={styles.otpRow}>
+            {otp.map((digit, idx) => (
+              <TextInput
+                key={idx}
+                ref={r => (inputs.current[idx] = r)}
+                style={[styles.otpBox, digit && styles.otpBoxFilled]}
+                value={digit}
+                onChangeText={v => handleChange(v, idx)}
+                onKeyPress={({ nativeEvent }) => handleKeyPress(nativeEvent.key, idx)}
+                keyboardType="number-pad"
+                maxLength={1}
+                textAlign="center"
+                caretHidden
+              />
+            ))}
+          </View>
         </View>
 
         <TouchableOpacity
@@ -80,85 +98,47 @@ export const OTPScreen: React.FC<OTPScreenProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.white },
+const createStyles = (C: ThemeColors) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: C.white },
   topArc: {
-    position: 'absolute',
-    top: -80,
-    left: -60,
-    right: -60,
-    height: 280,
-    borderRadius: 200,
-    backgroundColor: Colors.primary,
-    opacity: 0.08,
+    position: 'absolute', top: -80, left: -60, right: -60,
+    height: 280, borderRadius: 200,
+    backgroundColor: C.primary, opacity: 0.08,
   },
   content: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    flex: 1, alignItems: 'center', justifyContent: 'center',
     paddingHorizontal: Spacing.xxxl,
   },
   icon: { fontSize: 56, marginBottom: Spacing.base },
   title: {
-    fontFamily: Fonts.tajawal.extraBold,
-    fontSize: FontSize.xxl,
-    color: Colors.black,
-    marginBottom: Spacing.sm,
+    fontFamily: Fonts.tajawal.extraBold, fontSize: FontSize.xxl,
+    color: C.black, marginBottom: Spacing.sm,
   },
   subtitle: {
-    fontFamily: Fonts.tajawal.regular,
-    fontSize: FontSize.base,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: Spacing.xxl,
+    fontFamily: Fonts.tajawal.regular, fontSize: FontSize.base,
+    color: C.textSecondary, textAlign: 'center',
+    lineHeight: 24, marginBottom: Spacing.xxl,
   },
-  phone: {
-    fontFamily: Fonts.tajawal.bold,
-    color: Colors.primary,
-  },
-  otpRow: {
-    flexDirection: 'row',
-    gap: Spacing.base,
-    marginBottom: Spacing.xxl,
-  },
+  phone: { fontFamily: Fonts.tajawal.bold, color: C.primary },
+  // Wrap forces LTR so digits 0→3 go left→right regardless of device RTL setting
+  otpLtrWrap: { direction: 'ltr', marginBottom: Spacing.xxl },
+  otpRow: { flexDirection: 'row', gap: Spacing.base },
   otpBox: {
-    width: 56,
-    height: 64,
-    borderRadius: Radius.lg,
-    borderWidth: 2,
-    borderColor: Colors.gray200,
-    fontFamily: Fonts.inter.bold,
-    fontSize: FontSize.xxl,
-    color: Colors.black,
-    backgroundColor: Colors.gray100,
+    width: 56, height: 64, borderRadius: Radius.lg,
+    borderWidth: 2, borderColor: C.gray200,
+    fontFamily: Fonts.inter.bold, fontSize: FontSize.xxl,
+    color: C.black, backgroundColor: C.gray100,
   },
-  otpBoxFilled: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primaryLighter,
-  },
+  otpBoxFilled: { borderColor: C.primary, backgroundColor: C.primaryLighter },
   verifyBtn: {
-    backgroundColor: Colors.primary,
-    borderRadius: Radius.lg,
+    backgroundColor: C.primary, borderRadius: Radius.lg,
     paddingVertical: Spacing.base + 2,
     paddingHorizontal: Spacing.xxxl + Spacing.xl,
     marginBottom: Spacing.base,
   },
   verifyBtnDisabled: { opacity: 0.5 },
-  verifyBtnText: {
-    fontFamily: Fonts.tajawal.bold,
-    fontSize: FontSize.md,
-    color: Colors.white,
-  },
+  verifyBtnText: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.md, color: '#FFFFFF' },
   resendRow: { flexDirection: 'row', alignItems: 'center' },
-  resendText: {
-    fontFamily: Fonts.tajawal.regular,
-    fontSize: FontSize.base,
-    color: Colors.textSecondary,
-  },
-  resendLink: {
-    fontFamily: Fonts.tajawal.bold,
-    fontSize: FontSize.base,
-    color: Colors.primary,
-  },
+  resendText: { fontFamily: Fonts.tajawal.regular, fontSize: FontSize.base, color: C.textSecondary },
+  resendLink: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.base, color: C.primary },
 });

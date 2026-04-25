@@ -1,10 +1,12 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TextInput,
   TouchableOpacity, KeyboardAvoidingView, Platform,
   I18nManager,
 } from 'react-native';
-import { Colors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
+import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
+import { useTopInset } from '../../hooks/useTopInset';
 
 I18nManager.forceRTL(true);
 
@@ -30,7 +32,90 @@ const INITIAL_MESSAGES: Message[] = [
   { id: '5', text: 'بكل سرور! هل هناك أي تعليمات خاصة للهدية؟', sender: 'agent', time: '10:07' },
 ];
 
-const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
+export const ChatScreen: React.FC<ChatScreenProps> = ({
+  onBack, agentName = 'أحمد محمد', orderId = 'ORD-593821',
+}) => {
+  const { C } = useTheme();
+  const styles = useMemo(() => createStyles(C), [C]);
+  const topPadding = useTopInset();
+
+  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
+  const [input, setInput] = useState('');
+  const flatRef = useRef<FlatList>(null);
+
+  const sendMessage = () => {
+    if (!input.trim()) return;
+    const msg: Message = {
+      id: Date.now().toString(),
+      text: input.trim(),
+      sender: 'user',
+      time: new Date().toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' }),
+      status: 'sent',
+    };
+    setMessages(prev => [...prev, msg]);
+    setInput('');
+    setTimeout(() => flatRef.current?.scrollToEnd({ animated: true }), 100);
+  };
+
+  return (
+    <View style={styles.root}>
+      <View style={[styles.header, Shadow.header, { paddingTop: topPadding + Spacing.sm }]}>
+        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
+          <Text style={styles.backIcon}>→</Text>
+        </TouchableOpacity>
+        <View style={styles.headerCenter}>
+          <Text style={styles.headerName}>{agentName}</Text>
+          <Text style={styles.headerSub}>{orderId} · متصل الآن</Text>
+        </View>
+        <View style={styles.headerAvatar}>
+          <Text style={styles.headerAvatarText}>خ</Text>
+        </View>
+      </View>
+
+      <View style={styles.orderBanner}>
+        <Text style={styles.orderBannerText}>🎁 طلب: {orderId}</Text>
+      </View>
+
+      <FlatList
+        ref={flatRef}
+        data={messages}
+        keyExtractor={m => m.id}
+        renderItem={({ item }) => <MessageBubble message={item} C={C} styles={styles} />}
+        contentContainerStyle={styles.messagesList}
+        onContentSizeChange={() => flatRef.current?.scrollToEnd()}
+      />
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={80}
+      >
+        <View style={styles.inputBar}>
+          <TouchableOpacity style={styles.attachBtn}>
+            <Text style={styles.attachIcon}>📎</Text>
+          </TouchableOpacity>
+          <TextInput
+            style={styles.input}
+            value={input}
+            onChangeText={setInput}
+            placeholder="اكتب رسالتك..."
+            placeholderTextColor={C.gray500}
+            textAlign="right"
+            multiline
+          />
+          <TouchableOpacity
+            style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]}
+            onPress={sendMessage}
+            disabled={!input.trim()}
+          >
+            <Text style={styles.sendIcon}>⬆️</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
+    </View>
+  );
+};
+
+const MessageBubble: React.FC<{ message: Message; C: ThemeColors; styles: ReturnType<typeof createStyles> }> = ({ message, styles }) => {
   const isUser = message.sender === 'user';
   return (
     <View style={[styles.bubbleWrap, isUser ? styles.bubbleWrapUser : styles.bubbleWrapAgent]}>
@@ -52,131 +137,42 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
   );
 };
 
-export const ChatScreen: React.FC<ChatScreenProps> = ({
-  onBack,
-  agentName = 'أحمد محمد',
-  orderId = 'ORD-593821',
-}) => {
-  const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
-  const [input, setInput] = useState('');
-  const flatRef = useRef<FlatList>(null);
-
-  const sendMessage = () => {
-    if (!input.trim()) return;
-    const msg: Message = {
-      id: Date.now().toString(),
-      text: input.trim(),
-      sender: 'user',
-      time: new Date().toLocaleTimeString('ar', { hour: '2-digit', minute: '2-digit' }),
-      status: 'sent',
-    };
-    setMessages(prev => [...prev, msg]);
-    setInput('');
-    setTimeout(() => flatRef.current?.scrollToEnd({ animated: true }), 100);
-  };
-
-  return (
-    <View style={styles.root}>
-      {/* Header */}
-      <View style={[styles.header, Shadow.header]}>
-        <TouchableOpacity onPress={onBack} style={styles.backBtn}>
-          <Text style={styles.backIcon}>→</Text>
-        </TouchableOpacity>
-        <View style={styles.headerCenter}>
-          <Text style={styles.headerName}>{agentName}</Text>
-          <Text style={styles.headerSub}>{orderId} · متصل الآن</Text>
-        </View>
-        <View style={styles.headerAvatar}>
-          <Text style={styles.headerAvatarText}>خ</Text>
-        </View>
-      </View>
-
-      {/* Order reference banner */}
-      <View style={styles.orderBanner}>
-        <Text style={styles.orderBannerText}>🎁 طلب: {orderId}</Text>
-      </View>
-
-      {/* Messages */}
-      <FlatList
-        ref={flatRef}
-        data={messages}
-        keyExtractor={m => m.id}
-        renderItem={({ item }) => <MessageBubble message={item} />}
-        contentContainerStyle={styles.messagesList}
-        onContentSizeChange={() => flatRef.current?.scrollToEnd()}
-      />
-
-      {/* Input */}
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={80}
-      >
-        <View style={styles.inputBar}>
-          <TouchableOpacity style={styles.attachBtn}>
-            <Text style={styles.attachIcon}>📎</Text>
-          </TouchableOpacity>
-          <TextInput
-            style={styles.input}
-            value={input}
-            onChangeText={setInput}
-            placeholder="اكتب رسالتك..."
-            placeholderTextColor={Colors.gray500}
-            textAlign="right"
-            multiline
-          />
-          <TouchableOpacity
-            style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]}
-            onPress={sendMessage}
-            disabled={!input.trim()}
-          >
-            <Text style={styles.sendIcon}>⬆️</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.gray100 },
+const createStyles = (C: ThemeColors) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: C.gray100 },
   header: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.xxxl,
     paddingBottom: Spacing.base,
     gap: Spacing.sm,
   },
   backBtn: { padding: Spacing.sm },
-  backIcon: { fontSize: 20, color: Colors.primary },
+  backIcon: { fontSize: 20, color: C.primary },
   headerCenter: { flex: 1, alignItems: 'flex-end' },
   headerName: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.md,
-    color: Colors.black,
+    color: C.black,
   },
   headerSub: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.xs,
-    color: Colors.success,
+    color: C.success,
     marginTop: 2,
   },
   headerAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: C.primaryLight,
+    alignItems: 'center', justifyContent: 'center',
   },
   headerAvatarText: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.md,
-    color: Colors.primary,
+    color: C.primary,
   },
   orderBanner: {
-    backgroundColor: Colors.primaryLighter,
+    backgroundColor: C.primaryLighter,
     paddingHorizontal: Spacing.xl,
     paddingVertical: Spacing.xs,
     alignItems: 'flex-end',
@@ -184,7 +180,7 @@ const styles = StyleSheet.create({
   orderBannerText: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.sm,
-    color: Colors.primary,
+    color: C.primary,
   },
   messagesList: { padding: Spacing.base, gap: Spacing.sm },
   bubbleWrap: {
@@ -196,17 +192,14 @@ const styles = StyleSheet.create({
   bubbleWrapUser: { flexDirection: 'row-reverse' },
   bubbleWrapAgent: { flexDirection: 'row' },
   agentAvatar: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: Colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 30, height: 30, borderRadius: 15,
+    backgroundColor: C.primaryLight,
+    alignItems: 'center', justifyContent: 'center',
   },
   agentAvatarText: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.sm,
-    color: Colors.primary,
+    color: C.primary,
   },
   bubble: {
     maxWidth: '75%',
@@ -214,21 +207,21 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
   },
   bubbleUser: {
-    backgroundColor: Colors.primary,
+    backgroundColor: C.primary,
     borderBottomRightRadius: 4,
   },
   bubbleAgent: {
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     borderBottomLeftRadius: 4,
     ...Shadow.card,
   },
   bubbleText: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
-    color: Colors.black,
+    color: C.black,
     textAlign: 'right',
   },
-  bubbleTextUser: { color: Colors.white },
+  bubbleTextUser: { color: '#FFFFFF' },
   bubbleMeta: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
@@ -240,25 +233,25 @@ const styles = StyleSheet.create({
   bubbleTime: {
     fontFamily: Fonts.inter.regular,
     fontSize: 10,
-    color: Colors.gray500,
+    color: C.gray500,
   },
   bubbleTimeUser: { color: 'rgba(255,255,255,0.7)' },
   inputBar: {
     flexDirection: 'row-reverse',
     alignItems: 'flex-end',
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.sm,
     gap: Spacing.sm,
     borderTopWidth: 1,
-    borderTopColor: Colors.gray200,
+    borderTopColor: C.gray200,
   },
   input: {
     flex: 1,
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
-    color: Colors.black,
-    backgroundColor: Colors.gray100,
+    color: C.black,
+    backgroundColor: C.gray100,
     borderRadius: Radius.xxl,
     paddingHorizontal: Spacing.base,
     paddingVertical: Spacing.sm,
@@ -268,13 +261,10 @@ const styles = StyleSheet.create({
   attachBtn: { padding: Spacing.sm },
   attachIcon: { fontSize: 20 },
   sendBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: C.primary,
+    alignItems: 'center', justifyContent: 'center',
   },
-  sendBtnDisabled: { backgroundColor: Colors.gray300 },
+  sendBtnDisabled: { backgroundColor: C.gray300 },
   sendIcon: { fontSize: 16 },
 });

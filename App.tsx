@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, I18nManager } from 'react-native';
+import { View, StyleSheet, I18nManager } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import {
@@ -16,6 +17,7 @@ import {
   Inter_700Bold,
 } from '@expo-google-fonts/inter';
 import { RootNavigator } from './src/navigation/RootNavigator';
+import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 
 // Keep splash screen visible while loading fonts
 SplashScreen.preventAutoHideAsync();
@@ -46,15 +48,23 @@ export default function App() {
   }
 
   return (
-    <View style={styles.container} onLayout={onLayoutRootView}>
-      <RootNavigator />
-    </View>
+    <ThemeProvider>
+      <AppShell onLayout={onLayoutRootView} />
+    </ThemeProvider>
   );
 }
 
+const AppShell: React.FC<{ onLayout: () => void }> = ({ onLayout }) => {
+  const { C } = useTheme();
+  return (
+    <SafeAreaProvider>
+      <View style={[styles.container, { backgroundColor: C.bgPage }]} onLayout={onLayout}>
+        <RootNavigator />
+      </View>
+    </SafeAreaProvider>
+  );
+};
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
+  container: { flex: 1 },
 });

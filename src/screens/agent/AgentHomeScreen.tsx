@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, I18nManager,
 } from 'react-native';
-import { Colors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
+import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
+import { useTheme } from '../../context/ThemeContext';
 import { AppHeader } from '../../components/AppHeader';
 import { OrderCard } from '../../components/OrderCard';
 import { BottomTabBar } from '../../components/BottomTabBar';
@@ -19,26 +20,20 @@ const WEEK_DAYS = ['الأح', 'الإث', 'الثل', 'الأر', 'الخم', '
 const WEEK_DATES = [9, 10, 11, 12, 13, 14, 15];
 const BAR_DATA = [65, 80, 45, 90, 55, 75, 60];
 
-const StatCard: React.FC<{ icon: string; label: string; value: string; bg: string; textColor?: string }> = ({
-  icon, label, value, bg, textColor = Colors.black,
+const StatCard: React.FC<{ icon: string; label: string; value: string; bg: string; textColor?: string; subColor?: string }> = ({
+  icon, label, value, bg, textColor = '#000000', subColor,
 }) => (
-  <View style={[statStyles.card, { backgroundColor: bg }]}>
-    <Text style={statStyles.icon}>{icon}</Text>
-    <Text style={[statStyles.value, { color: textColor }]}>{value}</Text>
-    <Text style={[statStyles.label, { color: textColor === Colors.white ? 'rgba(255,255,255,0.8)' : Colors.textSecondary }]}>
-      {label}
-    </Text>
+  <View style={[statCardStyle.card, { backgroundColor: bg }]}>
+    <Text style={statCardStyle.icon}>{icon}</Text>
+    <Text style={[statCardStyle.value, { color: textColor }]}>{value}</Text>
+    <Text style={[statCardStyle.label, { color: subColor ?? textColor }]}>{label}</Text>
   </View>
 );
 
-const statStyles = StyleSheet.create({
+const statCardStyle = StyleSheet.create({
   card: {
-    flex: 1,
-    borderRadius: Radius.xl,
-    padding: Spacing.base,
-    minHeight: 108,
-    justifyContent: 'space-between',
-    margin: 4,
+    flex: 1, borderRadius: Radius.xl, padding: Spacing.base,
+    minHeight: 108, justifyContent: 'space-between', margin: 4,
   },
   icon: { fontSize: 20 },
   value: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.xl, textAlign: 'right' },
@@ -46,9 +41,10 @@ const statStyles = StyleSheet.create({
 });
 
 export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, onTabPress }) => {
+  const { C } = useTheme();
+  const styles = useMemo(() => createStyles(C), [C]);
   const [activeDay, setActiveDay] = useState(0);
   const [activeTab, setActiveTab] = useState('home');
-
   const maxBar = Math.max(...BAR_DATA);
 
   const handleTab = (route: string) => {
@@ -62,7 +58,6 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
 
-        {/* Earnings goal progress */}
         <View style={styles.section}>
           <View style={styles.goalCard}>
             <View style={styles.goalHeader}>
@@ -76,7 +71,6 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
           </View>
         </View>
 
-        {/* Weekly Calendar */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <TouchableOpacity><Text style={styles.seeAll}>التقويم الكامل</Text></TouchableOpacity>
@@ -96,20 +90,22 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
           </View>
         </View>
 
-        {/* Stats Grid */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { textAlign: 'right', marginBottom: Spacing.sm }]}>ملخص الأداء</Text>
           <View style={styles.statsRow}>
-            <StatCard icon="✅" label="طلبات مكتملة" value="30" bg={'rgba(103,49,149,0.1)'} />
-            <StatCard icon="📋" label="طلبات نشطة" value="10" bg={Colors.primaryLight} textColor={Colors.white} />
+            <StatCard icon="✅" label="طلبات مكتملة" value="30"
+              bg={C.primaryLighter} textColor={C.primary} subColor={C.textSecondary} />
+            <StatCard icon="📋" label="طلبات نشطة" value="10"
+              bg={C.primaryLight} textColor="#FFFFFF" subColor="rgba(255,255,255,0.8)" />
           </View>
           <View style={styles.statsRow}>
-            <StatCard icon="💰" label="الأرباح هذا الشهر" value="4,980 ر.س" bg={Colors.primary} textColor={Colors.white} />
-            <StatCard icon="📃" label="طلبات معلقة" value="5" bg={'rgba(201,174,236,0.3)'} />
+            <StatCard icon="💰" label="الأرباح هذا الشهر" value="4,980 ر.س"
+              bg={C.primary} textColor="#FFFFFF" subColor="rgba(255,255,255,0.8)" />
+            <StatCard icon="📃" label="طلبات معلقة" value="5"
+              bg={C.primaryLighter} textColor={C.black} subColor={C.textSecondary} />
           </View>
         </View>
 
-        {/* Weekly Earnings Chart */}
         <View style={styles.section}>
           <View style={[styles.chartCard, Shadow.card]}>
             <Text style={styles.chartTitle}>إجمالي الأرباح / أسبوع</Text>
@@ -122,7 +118,7 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
                         styles.bar,
                         {
                           height: (val / maxBar) * 120,
-                          backgroundColor: activeDay === idx ? Colors.primary : Colors.primaryLight,
+                          backgroundColor: activeDay === idx ? C.primary : C.primaryLight,
                         },
                       ]}
                     />
@@ -134,7 +130,6 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
           </View>
         </View>
 
-        {/* Recent Orders */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <TouchableOpacity><Text style={styles.seeAll}>عرض الكل</Text></TouchableOpacity>
@@ -164,8 +159,8 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
   );
 };
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: Colors.bgPage },
+const createStyles = (C: ThemeColors) => StyleSheet.create({
+  root: { flex: 1, backgroundColor: C.bgPage },
   scroll: { flex: 1 },
   section: { marginBottom: Spacing.base, paddingHorizontal: Spacing.xl },
   sectionHeader: {
@@ -177,18 +172,20 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.md,
-    color: Colors.black,
+    color: C.black,
   },
   seeAll: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.sm,
-    color: Colors.primary,
+    color: C.primary,
   },
   goalCard: {
-    backgroundColor: 'rgba(160,132,232,0.1)',
+    backgroundColor: C.primaryLighter,
     borderRadius: Radius.xl,
     padding: Spacing.base,
     marginTop: Spacing.base,
+    borderWidth: 1,
+    borderColor: C.primaryLight,
   },
   goalHeader: {
     flexDirection: 'row-reverse',
@@ -199,67 +196,64 @@ const styles = StyleSheet.create({
   goalLabel: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
   },
   goalValue: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.lg,
-    color: Colors.primary,
+    color: C.primary,
   },
   progressBg: {
-    height: 6,
-    borderRadius: 70,
-    backgroundColor: 'rgba(0,0,0,0.1)',
+    height: 6, borderRadius: 70,
+    backgroundColor: C.gray200,
     marginBottom: Spacing.sm,
   },
   progressFill: {
-    height: 6,
-    borderRadius: 70,
-    backgroundColor: Colors.primary,
+    height: 6, borderRadius: 70,
+    backgroundColor: C.primary,
   },
   goalSub: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.sm,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     textAlign: 'right',
   },
   weekRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: Colors.gray100,
+    backgroundColor: C.gray100,
     borderRadius: Radius.xl,
     padding: Spacing.xs,
   },
   dayCol: {
-    flex: 1,
-    alignItems: 'center',
+    flex: 1, alignItems: 'center',
     paddingVertical: Spacing.sm,
     borderRadius: Radius.lg,
   },
-  dayColActive: { backgroundColor: Colors.primary },
+  dayColActive: { backgroundColor: C.primary },
   dayLabel: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.xs,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     marginBottom: 2,
   },
-  dayLabelActive: { color: Colors.white },
+  dayLabelActive: { color: '#FFFFFF' },
   dayNum: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.sm,
-    color: Colors.black,
+    color: C.black,
   },
-  dayNumActive: { color: Colors.white },
+  dayNumActive: { color: '#FFFFFF' },
   statsRow: { flexDirection: 'row', marginBottom: 0 },
   chartCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: C.white,
     borderRadius: Radius.xl,
     padding: Spacing.base,
   },
   chartTitle: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     textAlign: 'right',
     marginBottom: Spacing.base,
   },
@@ -275,7 +269,7 @@ const styles = StyleSheet.create({
   barLabel: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: 9,
-    color: Colors.textSecondary,
+    color: C.textSecondary,
     marginTop: 4,
   },
 });
