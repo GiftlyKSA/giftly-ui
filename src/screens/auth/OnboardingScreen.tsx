@@ -110,8 +110,10 @@ export default function OnboardingScreen({ onFinish }: Props) {
               <View style={styles.emojiWrap}>
                 <Text style={styles.emoji}>{item.emoji}</Text>
               </View>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.subtitle}>{item.subtitle}</Text>
+              <View style={styles.textWrap}>
+                <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'center' }]}>{item.title}</Text>
+                <Text style={[styles.subtitle, { textAlign: isRTL ? 'right' : 'center' }]}>{item.subtitle}</Text>
+              </View>
             </View>
           )}
         />
@@ -161,11 +163,11 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   emoji: { fontSize: 80 },
+  textWrap: { width: '100%' },
   title: {
     fontFamily: Fonts.tajawal.extraBold,
     fontSize: FontSize.xxxl,
     color: '#FFFFFF',
-    textAlign: 'center',
     lineHeight: 38,
     marginBottom: Spacing.base,
   },
@@ -173,7 +175,6 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
     color: 'rgba(255,255,255,0.75)',
-    textAlign: 'center',
     lineHeight: 22,
   },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: Spacing.lg },
