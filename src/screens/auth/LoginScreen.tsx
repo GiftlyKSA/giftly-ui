@@ -31,8 +31,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
             <Text style={styles.logoText}>🎁</Text>
           </View>
           <Text style={styles.appName}>Giftly</Text>
-          <Text style={styles.tagline}>{t.login_tagline}</Text>
         </View>
+        <Text style={styles.tagline}>{t.login_tagline}</Text>
 
         <View style={styles.fieldWrap}>
           <Text style={styles.label}>{t.login_phone_label}</Text>
@@ -70,7 +70,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
 const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.white },
   scroll: { padding: Spacing.xl, paddingTop: Spacing.xxxl + 20 },
-  logoWrap: { alignItems: 'center', marginBottom: Spacing.xxl + 16 },
+  logoWrap: { alignItems: 'center', marginBottom: 4 },
   logoCircle: {
     width: 80, height: 80, borderRadius: 40,
     backgroundColor: C.primaryLighter,
@@ -87,8 +87,8 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
     color: C.textSecondary,
-    marginTop: 4,
-    textAlign: 'center',
+    marginBottom: Spacing.xxl + 16,
+    textAlign: isRTL ? 'right' : 'center',
   },
   fieldWrap: { marginBottom: Spacing.xl },
   label: {
