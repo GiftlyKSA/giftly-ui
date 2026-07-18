@@ -98,7 +98,7 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
       <AppHeader userName="محمد" balance="1,321" onProfilePress={() => {}} />
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-        <View style={styles.heroSection}>
+        <View style={[styles.heroSection, { direction: isRTL ? 'rtl' : 'ltr' }]}>
           <Text style={styles.heroText}>{t.home_hero}</Text>
         </View>
 

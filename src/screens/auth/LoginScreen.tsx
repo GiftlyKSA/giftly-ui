@@ -32,7 +32,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
           </View>
           <Text style={styles.appName}>Giftly</Text>
         </View>
-        <Text style={styles.tagline}>{t.login_tagline}</Text>
+        <Text style={[styles.tagline, { direction: isRTL ? 'rtl' : 'ltr' }]}>{t.login_tagline}</Text>
 
         <View style={styles.fieldWrap}>
           <Text style={styles.label}>{t.login_phone_label}</Text>
