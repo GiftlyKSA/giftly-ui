@@ -41,7 +41,7 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
   ];
 
   const tabs = isAgent ? agentTabs : userTabs;
-  const renderedTabs = isRTL ? [...tabs].reverse() : tabs;
+  const renderedTabs = tabs;
 
   return (
     <View style={styles.container}>

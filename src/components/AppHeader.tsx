@@ -63,7 +63,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
 
 const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   header: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: C.white,

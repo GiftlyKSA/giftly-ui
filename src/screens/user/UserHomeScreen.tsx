@@ -62,21 +62,21 @@ const createGiftCardStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.crea
     backgroundColor: C.primaryLighter,
     borderRadius: Radius.sm,
     paddingHorizontal: 8, paddingVertical: 3,
-    alignSelf: isRTL ? 'flex-end' : 'flex-start', marginBottom: 4,
+    alignSelf: 'flex-start', marginBottom: 4,
   },
   tag: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.xs, color: C.primary },
   title: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.sm,
     color: C.black,
-    textAlign: isRTL ? 'right' : 'left',
+    textAlign: 'left',
     marginBottom: 4,
   },
   price: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.base,
     color: C.primary,
-    textAlign: isRTL ? 'right' : 'left',
+    textAlign: 'left',
   },
 });
 
@@ -95,7 +95,7 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
 
   return (
     <View style={styles.root}>
-      <AppHeader userName="محمد" balance="1,321" onProfilePress={() => {}} />
+      <AppHeader userName="محمد" balance="9536" onProfilePress={() => {}} />
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         <View style={[styles.heroSection, { direction: isRTL ? 'rtl' : 'ltr' }]}>
