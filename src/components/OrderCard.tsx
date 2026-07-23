@@ -33,10 +33,8 @@ export const OrderCard: React.FC<OrderCardProps> = ({
 
   return (
     <TouchableOpacity style={[styles.card, Shadow.card]} onPress={onPress} activeOpacity={0.85}>
-      <View style={styles.iconWrap}>
-        <View style={styles.iconCircle}>
-          <Text style={styles.iconEmoji}>🎁</Text>
-        </View>
+      <View style={styles.iconCircle}>
+        <Text style={styles.iconEmoji}>🎁</Text>
       </View>
 
       <View style={styles.content}>
@@ -65,7 +63,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({
 
 const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   card: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: C.white,
     borderRadius: Radius.lg,
@@ -73,8 +71,8 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     borderColor: C.primaryLight,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
+    gap: Spacing.sm,
   },
-  iconWrap: { marginLeft: isRTL ? Spacing.sm : 0, marginRight: isRTL ? 0 : Spacing.sm },
   iconCircle: {
     width: 40, height: 40, borderRadius: Radius.md,
     backgroundColor: C.primaryLighter,

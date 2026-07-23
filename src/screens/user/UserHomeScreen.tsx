@@ -98,7 +98,7 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
       <AppHeader userName="محمد" balance="9536" onProfilePress={() => {}} />
 
       <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-        <View style={[styles.heroSection, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+        <View style={styles.heroSection}>
           <Text style={styles.heroText}>{t.home_hero}</Text>
         </View>
 
@@ -140,10 +140,8 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
         <View style={styles.section}>
           {t.upcoming_events.map(event => (
             <View key={event.id} style={styles.eventCard}>
-              <View style={styles.eventLeft}>
-                <View style={styles.prepBtn}>
-                  <Text style={styles.prepBtnText}>{t.home_prepare}</Text>
-                </View>
+              <View style={styles.prepBtn}>
+                <Text style={styles.prepBtnText}>{t.home_prepare}</Text>
               </View>
               <View style={styles.eventContent}>
                 <Text style={styles.eventTitle}>{event.title}</Text>
@@ -186,7 +184,11 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
 const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bgPage },
   scroll: { flex: 1 },
-  heroSection: { paddingHorizontal: Spacing.xl, paddingVertical: Spacing.xl },
+  heroSection: {
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.xl,
+    alignItems: isRTL ? 'flex-end' : 'flex-start',
+  },
   heroText: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.xxxl,
@@ -212,7 +214,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     color: C.primary,
   },
   weekRow: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     backgroundColor: C.gray100,
     borderRadius: Radius.xl,
@@ -239,7 +241,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   },
   dayNumActive: { color: '#FFFFFF' },
   eventCard: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: C.white,
     borderRadius: Radius.lg,
@@ -247,14 +249,13 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     borderColor: C.primary,
     padding: Spacing.md,
     marginBottom: Spacing.sm,
+    gap: Spacing.sm,
     ...Shadow.card,
   },
   eventIconWrap: {
     width: 40, height: 40, borderRadius: Radius.md,
     backgroundColor: C.primaryLighter,
     alignItems: 'center', justifyContent: 'center',
-    marginLeft: isRTL ? Spacing.sm : 0,
-    marginRight: isRTL ? 0 : Spacing.sm,
   },
   eventIcon: { fontSize: 20 },
   eventContent: { flex: 1, alignItems: isRTL ? 'flex-end' : 'flex-start' },
@@ -264,7 +265,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     color: C.black,
     textAlign: isRTL ? 'right' : 'left',
   },
-  eventTimeRow: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
+  eventTimeRow: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', marginTop: 4 },
   eventDate: {
     fontFamily: Fonts.inter.regular,
     fontSize: FontSize.xs,
@@ -275,7 +276,6 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     fontSize: FontSize.xs,
     color: C.primary,
   },
-  eventLeft: { marginRight: isRTL ? Spacing.xs : 0, marginLeft: isRTL ? 0 : Spacing.xs },
   prepBtn: {
     backgroundColor: C.primary,
     borderRadius: Radius.sm,

@@ -208,7 +208,7 @@ const MenuItem: React.FC<{
 const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bgPage },
   header: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: C.white,
@@ -268,7 +268,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   ratingStars: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.base, color: '#FFB800' },
   ratingCount: { fontFamily: Fonts.tajawal.regular, fontSize: FontSize.base, color: C.textSecondary },
   statsRow: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     backgroundColor: C.gray100,
     borderRadius: Radius.xl,
     paddingVertical: Spacing.base,
@@ -299,7 +299,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     ...Shadow.card,
   },
   menuItem: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.base,
     gap: Spacing.sm,
@@ -330,14 +330,14 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   },
   divider: { height: 1, backgroundColor: C.gray100, marginHorizontal: Spacing.base },
   toggleItem: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: Spacing.base,
   },
   toggleText: {
     flex: 1,
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
   },
@@ -370,7 +370,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     marginBottom: Spacing.base,
   },
   langOption: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: Spacing.md,
