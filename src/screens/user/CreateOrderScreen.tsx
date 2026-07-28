@@ -5,6 +5,7 @@ import {
   Platform, TouchableWithoutFeedback, Keyboard,
 } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -118,7 +119,7 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
             }}
             activeOpacity={0.7}
           >
-            <Text style={styles.calIcon}>📅</Text>
+            <Ionicons name="calendar-outline" size={18} color={C.gray500} />
             <Text style={[styles.selectText, !deliveryDate && styles.placeholder]}>
               {deliveryDate ? formatDate(deliveryDate) : t.create_date_ph}
             </Text>
@@ -225,7 +226,7 @@ export const CreateOrderScreen: React.FC<Props> = ({ onSubmit, onBack }) => {
 const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bgPage },
   header: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: C.white,
@@ -242,7 +243,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   },
   scroll: { padding: Spacing.xl, paddingBottom: 40 },
   hintCard: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'flex-start',
     backgroundColor: C.primaryLighter,
     borderRadius: Radius.lg,
@@ -263,7 +264,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   },
   fieldWrap: { marginBottom: Spacing.xl },
   labelRow: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
     marginBottom: Spacing.xs,
@@ -296,9 +297,10 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     backgroundColor: C.white,
   },
   selectBtn: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: Spacing.xs,
     borderWidth: 2,
     borderColor: C.gray200,
     borderRadius: Radius.lg,
@@ -317,13 +319,6 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   selectArrow: {
     fontSize: 14,
     color: C.gray500,
-    marginLeft: isRTL ? 4 : 0,
-    marginRight: isRTL ? 0 : 4,
-  },
-  calIcon: {
-    fontSize: 18,
-    marginLeft: isRTL ? 4 : 0,
-    marginRight: isRTL ? 0 : 4,
   },
   submitBtn: {
     backgroundColor: C.primary,

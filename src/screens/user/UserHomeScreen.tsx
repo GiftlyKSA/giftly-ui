@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity, FlatList,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -146,7 +147,8 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
               <View style={styles.eventContent}>
                 <Text style={styles.eventTitle}>{event.title}</Text>
                 <View style={styles.eventTimeRow}>
-                  <Text style={styles.eventDate}>⏰ {event.date}</Text>
+                  <Ionicons name="time-outline" size={12} color={C.gray500} style={styles.eventTimeIcon} />
+                  <Text style={styles.eventDate}>{event.date}</Text>
                   <Text style={styles.eventDays}> {t.days_left(event.daysLeft)}</Text>
                 </View>
               </View>
@@ -265,7 +267,8 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     color: C.black,
     textAlign: isRTL ? 'right' : 'left',
   },
-  eventTimeRow: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', marginTop: 4 },
+  eventTimeRow: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', marginTop: 4, gap: 3 },
+  eventTimeIcon: { marginTop: 1 },
   eventDate: {
     fontFamily: Fonts.inter.regular,
     fontSize: FontSize.xs,

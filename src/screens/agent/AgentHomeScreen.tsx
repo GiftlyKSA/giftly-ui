@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -19,7 +20,7 @@ const WEEK_DATES = [9, 10, 11, 12, 13, 14, 15];
 const BAR_DATA = [65, 80, 45, 90, 55, 75, 60];
 
 const StatCard: React.FC<{
-  icon: string;
+  icon: keyof typeof Ionicons.glyphMap;
   label: string;
   value: string;
   bg: string;
@@ -30,7 +31,7 @@ const StatCard: React.FC<{
   icon, label, value, bg, isRTL, textColor = '#000000', subColor,
 }) => (
   <View style={[statCardStyle.card, { backgroundColor: bg }]}>
-    <Text style={statCardStyle.icon}>{icon}</Text>
+    <Ionicons name={icon} size={20} color={textColor} />
     <Text style={[statCardStyle.value, { color: textColor, textAlign: isRTL ? 'right' : 'left' }]}>{value}</Text>
     <Text style={[statCardStyle.label, { color: subColor ?? textColor, textAlign: isRTL ? 'right' : 'left' }]}>{label}</Text>
   </View>
@@ -41,7 +42,6 @@ const statCardStyle = StyleSheet.create({
     flex: 1, borderRadius: Radius.xl, padding: Spacing.base,
     minHeight: 108, justifyContent: 'space-between', margin: 4,
   },
-  icon: { fontSize: 20 },
   value: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.xl },
   label: { fontFamily: Fonts.tajawal.regular, fontSize: FontSize.xs },
 });
@@ -101,15 +101,15 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left', marginBottom: Spacing.sm }]}>{t.agent_perf}</Text>
           <View style={styles.statsRow}>
-            <StatCard icon="✅" label={t.agent_completed} value="30"
+            <StatCard icon="checkmark-circle-outline" label={t.agent_completed} value="30"
               bg={C.primaryLighter} isRTL={isRTL} textColor={C.primary} subColor={C.textSecondary} />
-            <StatCard icon="📋" label={t.agent_active_orders} value="10"
+            <StatCard icon="clipboard-outline" label={t.agent_active_orders} value="10"
               bg={C.primaryLight} isRTL={isRTL} textColor="#FFFFFF" subColor="rgba(255,255,255,0.8)" />
           </View>
           <View style={styles.statsRow}>
-            <StatCard icon="💰" label={t.agent_earnings} value="4,980 ر.س"
+            <StatCard icon="cash-outline" label={t.agent_earnings} value="4,980 ر.س"
               bg={C.primary} isRTL={isRTL} textColor="#FFFFFF" subColor="rgba(255,255,255,0.8)" />
-            <StatCard icon="📃" label={t.agent_pending} value="5"
+            <StatCard icon="time-outline" label={t.agent_pending} value="5"
               bg={C.primaryLighter} isRTL={isRTL} textColor={C.black} subColor={C.textSecondary} />
           </View>
         </View>
@@ -172,7 +172,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   scroll: { flex: 1 },
   section: { marginBottom: Spacing.base, paddingHorizontal: Spacing.xl },
   sectionHeader: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.sm,
@@ -197,7 +197,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     borderColor: C.primaryLight,
   },
   goalHeader: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.sm,
@@ -229,7 +229,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     textAlign: isRTL ? 'right' : 'left',
   },
   weekRow: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     backgroundColor: C.gray100,
     borderRadius: Radius.xl,
@@ -254,7 +254,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     color: C.black,
   },
   dayNumActive: { color: '#FFFFFF' },
-  statsRow: { flexDirection: isRTL ? 'row-reverse' : 'row', marginBottom: 0 },
+  statsRow: { flexDirection: 'row', marginBottom: 0 },
   chartCard: {
     backgroundColor: C.white,
     borderRadius: Radius.xl,

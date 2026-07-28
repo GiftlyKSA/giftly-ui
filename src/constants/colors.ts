@@ -73,9 +73,9 @@ export const lightColors = {
 };
 
 export const darkColors: ThemeColors = {
-  primary: '#9B5FD8',
-  primaryLight: '#6B3A9A',
-  primaryLighter: '#1E1030',
+  primary: '#A876E0',
+  primaryLight: '#7A48AD',
+  primaryLighter: '#2B1A44',
   primaryMid: '#B070E8',
   primaryAccent: '#C090EE',
 
@@ -83,24 +83,24 @@ export const darkColors: ThemeColors = {
   successBg: '#0A2E1A',
   info: '#3090D8',
   infoBg: 'rgba(48,144,216,0.15)',
-  error: '#FF5555',
+  error: '#FF6B6B',
   warning: '#FFB020',
   teal: '#30AFA5',
   tealDark: '#1D9C82',
 
-  black: '#EEEEf4',          // primary text
-  white: '#0D0D14',          // main background
-  dark: '#D0D0DC',
-  gray100: '#16161F',        // input / card bg
-  gray200: '#232332',        // borders
-  gray300: '#30303F',
-  gray400: '#44444F',
-  gray500: '#68687A',
-  gray600: '#909098',
-  textSecondary: 'rgba(210,210,225,0.55)',
-  textTertiary: 'rgba(210,210,225,0.3)',
+  black: '#F2F2F7',          // primary text
+  white: '#1E1E2C',          // card / surface background (kept distinct from page bg)
+  dark: '#D8D8E2',
+  gray100: '#15151F',        // soft fill (chat canvas, input fields) — a step below card surfaces
+  gray200: '#2E2E40',        // borders
+  gray300: '#3C3C50',
+  gray400: '#54545F',
+  gray500: '#84869A',
+  gray600: '#A8AAB8',
+  textSecondary: 'rgba(216,216,226,0.75)',
+  textTertiary: 'rgba(216,216,226,0.45)',
 
-  bgCard: '#16161F',
+  bgCard: '#1E1E2C',
   bgPage: '#0D0D14',
   bgOverlay: 'rgba(0,0,0,0.55)',
 

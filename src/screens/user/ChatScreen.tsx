@@ -4,6 +4,7 @@ import {
   TouchableOpacity, KeyboardAvoidingView, Platform,
   TouchableWithoutFeedback, Keyboard,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -93,7 +94,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
 
       <View style={styles.inputBar}>
         <TouchableOpacity style={styles.attachBtn}>
-          <Text style={styles.attachIcon}>📎</Text>
+          <Ionicons name="attach-outline" size={22} color={C.gray600} />
         </TouchableOpacity>
         <TextInput
           style={styles.input}
@@ -109,7 +110,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
           onPress={sendMessage}
           disabled={!input.trim()}
         >
-          <Text style={styles.sendIcon}>⬆️</Text>
+          <Ionicons name="send" size={16} color="#FFFFFF" style={styles.sendIcon} />
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -142,7 +143,7 @@ const MessageBubble: React.FC<{ message: Message; C: ThemeColors; styles: Return
 const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.gray100 },
   header: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: C.white,
     paddingHorizontal: Spacing.xl,
@@ -192,8 +193,8 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     marginBottom: Spacing.sm,
     gap: Spacing.sm,
   },
-  bubbleWrapUser: { flexDirection: isRTL ? 'row-reverse' : 'row' },
-  bubbleWrapAgent: { flexDirection: isRTL ? 'row' : 'row-reverse' },
+  bubbleWrapUser: { flexDirection: 'row' },
+  bubbleWrapAgent: { flexDirection: 'row-reverse' },
   agentAvatar: {
     width: 30, height: 30, borderRadius: 15,
     backgroundColor: C.primaryLight,
@@ -242,7 +243,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   },
   bubbleTimeUser: { color: 'rgba(255,255,255,0.7)' },
   inputBar: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'flex-end',
     backgroundColor: C.white,
     paddingHorizontal: Spacing.base,
@@ -264,12 +265,11 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     maxHeight: 100,
   },
   attachBtn: { padding: Spacing.sm },
-  attachIcon: { fontSize: 20 },
   sendBtn: {
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: C.primary,
     alignItems: 'center', justifyContent: 'center',
   },
   sendBtnDisabled: { backgroundColor: C.gray300 },
-  sendIcon: { fontSize: 16 },
+  sendIcon: { marginLeft: 2 },
 });

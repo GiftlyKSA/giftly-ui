@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView,
   TouchableOpacity,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -14,7 +15,9 @@ interface OrderTrackingScreenProps {
   onChat: () => void;
 }
 
-const STAGE_ICONS = ['📋', '⚙️', '📦', '🚗', '✅'];
+const STAGE_ICONS: (keyof typeof Ionicons.glyphMap)[] = [
+  'document-text-outline', 'construct-outline', 'cube-outline', 'car-outline', 'checkmark-circle-outline',
+];
 const STAGE_DONE = [true, true, true, false, false];
 const STAGE_ACTIVE = [false, false, false, true, false];
 
@@ -43,7 +46,7 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t.track_title}</Text>
         <TouchableOpacity onPress={onChat} style={styles.chatBtn}>
-          <Text style={styles.chatIcon}>💬</Text>
+          <Ionicons name="chatbubble-ellipses-outline" size={22} color={C.primary} />
         </TouchableOpacity>
       </View>
 
@@ -51,6 +54,7 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
         <View style={[styles.orderIdCard, Shadow.card]}>
           <View style={styles.orderIdRow}>
             <TouchableOpacity style={styles.copyBtn}>
+              <Ionicons name="copy-outline" size={13} color={C.primary} />
               <Text style={styles.copyText}>{t.track_copy}</Text>
             </TouchableOpacity>
             <Text style={styles.orderId}>{orderId}</Text>
@@ -58,17 +62,26 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
           <View style={styles.orderMeta}>
             <View style={styles.metaItem}>
               <Text style={styles.metaValue}>12:00 - 16:00</Text>
-              <Text style={styles.metaLabel}>{t.track_delivery_time}</Text>
+              <View style={styles.metaLabelRow}>
+                <Ionicons name="time-outline" size={11} color={C.textSecondary} />
+                <Text style={styles.metaLabel}>{t.track_delivery_time}</Text>
+              </View>
             </View>
             <View style={styles.metaDivider} />
             <View style={styles.metaItem}>
               <Text style={styles.metaValue}>9 أبريل 2025</Text>
-              <Text style={styles.metaLabel}>{t.track_order_date}</Text>
+              <View style={styles.metaLabelRow}>
+                <Ionicons name="calendar-outline" size={11} color={C.textSecondary} />
+                <Text style={styles.metaLabel}>{t.track_order_date}</Text>
+              </View>
             </View>
             <View style={styles.metaDivider} />
             <View style={styles.metaItem}>
               <Text style={styles.metaValue}>250 ر.س</Text>
-              <Text style={styles.metaLabel}>{t.track_amount}</Text>
+              <View style={styles.metaLabelRow}>
+                <Ionicons name="cash-outline" size={11} color={C.textSecondary} />
+                <Text style={styles.metaLabel}>{t.track_amount}</Text>
+              </View>
             </View>
           </View>
         </View>
@@ -101,7 +114,11 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
                 stage.done && styles.stageDotDone,
                 stage.active && styles.stageDotActive,
               ]}>
-                <Text style={styles.stageDotText}>{stage.icon}</Text>
+                <Ionicons
+                  name={stage.icon}
+                  size={18}
+                  color={stage.active ? '#FFFFFF' : stage.done ? C.primary : C.gray500}
+                />
               </View>
               <View style={styles.stageContent}>
                 <Text style={[
@@ -121,7 +138,7 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
 
         <View style={[styles.mapCard, Shadow.card]}>
           <View style={styles.mapPlaceholder}>
-            <Text style={styles.mapEmoji}>🗺️</Text>
+            <Ionicons name="map-outline" size={34} color={C.primary} style={styles.mapEmoji} />
             <Text style={styles.mapText}>{t.track_live}</Text>
             <Text style={styles.mapSub}>{t.track_live_sub}</Text>
           </View>
@@ -132,6 +149,7 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
             <Text style={styles.cancelBtnText}>{t.track_cancel}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.chatActionBtn} onPress={onChat}>
+            <Ionicons name="chatbubbles-outline" size={16} color="#FFFFFF" />
             <Text style={styles.chatActionText}>{t.track_chat}</Text>
           </TouchableOpacity>
         </View>
@@ -143,7 +161,7 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
 const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bgPage },
   header: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: C.white,
@@ -160,7 +178,6 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     color: C.black,
   },
   chatBtn: { padding: Spacing.sm },
-  chatIcon: { fontSize: 22 },
   scroll: { padding: Spacing.xl, paddingBottom: 40 },
   orderIdCard: {
     backgroundColor: C.white,
@@ -169,7 +186,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     marginBottom: Spacing.base,
   },
   orderIdRow: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: Spacing.base,
@@ -180,6 +197,9 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     color: C.black,
   },
   copyBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     backgroundColor: C.primaryLighter,
     borderRadius: Radius.sm,
     paddingHorizontal: Spacing.sm,
@@ -191,7 +211,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     color: C.primary,
   },
   orderMeta: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     justifyContent: 'space-between',
   },
   metaItem: { flex: 1, alignItems: 'center' },
@@ -201,16 +221,21 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     color: C.black,
     textAlign: 'center',
   },
+  metaLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginTop: 2,
+  },
   metaLabel: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.xs,
     color: C.textSecondary,
     textAlign: 'center',
-    marginTop: 2,
   },
   metaDivider: { width: 1, backgroundColor: C.gray200 },
   giftPreview: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     backgroundColor: C.white,
     borderRadius: Radius.xl,
     padding: Spacing.base,
@@ -239,7 +264,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     textAlign: isRTL ? 'right' : 'left',
     marginBottom: Spacing.sm,
   },
-  agentRow: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: 6 },
+  agentRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   agentAvatar: {
     width: 24, height: 24, borderRadius: 12,
     backgroundColor: C.primaryLight,
@@ -269,10 +294,11 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     marginBottom: Spacing.base,
   },
   stageRow: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     alignItems: 'flex-start',
     position: 'relative',
     paddingBottom: Spacing.base,
+    gap: Spacing.base,
   },
   stageLine: {
     position: 'absolute',
@@ -288,12 +314,9 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     width: 40, height: 40, borderRadius: 20,
     backgroundColor: C.gray100,
     alignItems: 'center', justifyContent: 'center',
-    marginLeft: isRTL ? Spacing.base : 0,
-    marginRight: isRTL ? 0 : Spacing.base,
   },
   stageDotDone: { backgroundColor: C.primaryLighter },
   stageDotActive: { backgroundColor: C.primary },
-  stageDotText: { fontSize: 18 },
   stageContent: { flex: 1, paddingTop: 8, alignItems: isRTL ? 'flex-end' : 'flex-start' },
   stageLabel: {
     fontFamily: Fonts.tajawal.regular,
@@ -320,7 +343,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     backgroundColor: C.primaryLighter,
     alignItems: 'center', justifyContent: 'center',
   },
-  mapEmoji: { fontSize: 36, marginBottom: Spacing.sm },
+  mapEmoji: { marginBottom: Spacing.sm },
   mapText: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.base,
@@ -332,7 +355,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     color: C.textSecondary,
     marginTop: 4,
   },
-  actions: { flexDirection: isRTL ? 'row-reverse' : 'row', gap: Spacing.sm },
+  actions: { flexDirection: 'row', gap: Spacing.sm },
   cancelBtn: {
     flex: 1,
     borderWidth: 2, borderColor: C.error,
@@ -347,10 +370,13 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   },
   chatActionBtn: {
     flex: 1,
+    flexDirection: 'row',
+    gap: 6,
     backgroundColor: C.primary,
     borderRadius: Radius.lg,
     paddingVertical: Spacing.md,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   chatActionText: {
     fontFamily: Fonts.tajawal.bold,

@@ -31,8 +31,9 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({
   isAgent = false, onOrderPress, onTabPress,
 }) => {
   const { C } = useTheme();
-  const { t } = useLanguage();
-  const styles = useMemo(() => createStyles(C), [C]);
+  const { t, lang } = useLanguage();
+  const isRTL = lang === 'ar';
+  const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
   const topPadding = useTopInset();
 
   const [activeFilter, setActiveFilter] = useState<FilterKey>('all');
@@ -67,7 +68,7 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({
       <View style={styles.filtersWrap}>
         <FlatList
           horizontal
-          inverted
+          inverted={isRTL}
           data={FILTER_KEYS}
           keyExtractor={f => f}
           renderItem={({ item }) => (
@@ -118,7 +119,7 @@ export const OrdersScreen: React.FC<OrdersScreenProps> = ({
   );
 };
 
-const createStyles = (C: ThemeColors) => StyleSheet.create({
+const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bgPage },
   header: {
     backgroundColor: C.white,
@@ -126,7 +127,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
     paddingBottom: Spacing.base,
     borderBottomLeftRadius: Radius.lg,
     borderBottomRightRadius: Radius.lg,
-    alignItems: 'flex-end',
+    alignItems: isRTL ? 'flex-end' : 'flex-start',
   },
   headerTitle: {
     fontFamily: Fonts.tajawal.bold,
@@ -153,7 +154,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
   summary: {
     paddingHorizontal: Spacing.xl,
     marginBottom: Spacing.sm,
-    alignItems: 'flex-end',
+    alignItems: isRTL ? 'flex-end' : 'flex-start',
   },
   summaryText: {
     fontFamily: Fonts.tajawal.regular,

@@ -49,7 +49,7 @@ const ar = {
   home_orders: 'طلبات مسجلة',
   home_prepare: 'جهّز هديتك',
   home_currency: ' ر.س',
-  home_greeting: 'اهلاً، ',
+  home_greeting: 'أهلاً، ',
 
   // Week days
   days: ['الأح', 'الإث', 'الثل', 'الأر', 'الخم', 'الجم', 'الس'],
@@ -67,8 +67,8 @@ const ar = {
   ord_active: 'نشط',
   ord_done: 'مكتمل',
   ord_cancelled: 'ملغي',
-  ord_empty_title: 'لا توجد طلبات',
-  ord_empty_sub: 'لم تقم بأي طلبات بعد',
+  ord_empty_title: 'لا توجد طلبات بعد',
+  ord_empty_sub: 'اطلب أول هدية لمن تحب، ونحن نتولى الباقي',
   ord_count: (n: number) => `${n} طلب`,
 
   // Order status
@@ -80,7 +80,7 @@ const ar = {
 
   // Create order
   create_title: 'طلب جديد',
-  create_hint: 'لا تعرف ماذا تطلب؟ أخبرنا عن المناسبة فقط وسيساعدك خبراؤنا في اختيار الهدية المثالية!',
+  create_hint: 'لا تعرف ماذا تُهدي؟ أخبرنا بالمناسبة وسيتولى خبراؤنا اختيار الهدية المثالية لك.',
   create_desc: 'وصف الطلب',
   create_optional: 'اختياري',
   create_desc_ph: 'اكتب تفاصيل المناسبة أو ما تريد إهداءه...\nمثال: هدية عيد ميلاد لصديق عمره ٢٥ سنة',
@@ -117,16 +117,16 @@ const ar = {
   track_live: 'تتبع الموقع المباشر',
   track_live_sub: 'سيظهر هنا موقع المندوب',
   track_cancel: 'إلغاء الطلب',
-  track_chat: '💬 تواصل مع الخبير',
+  track_chat: 'تواصل مع الخبير',
   track_stages_title: 'مراحل الطلب',
-  track_copy: '📋 نسخ',
-  track_delivery_time: '⏰ وقت التوصيل',
-  track_order_date: '📅 تاريخ الطلب',
-  track_amount: '💰 المبلغ',
+  track_copy: 'نسخ',
+  track_delivery_time: 'وقت التوصيل',
+  track_order_date: 'تاريخ الطلب',
+  track_amount: 'المبلغ',
 
   // Profile
   profile_title: 'الملف الشخصي',
-  profile_edit: '✏️ تعديل',
+  profile_edit: 'تعديل',
   profile_account: 'معلومات الحساب',
   profile_email: 'البريد الإلكتروني',
   profile_address: 'العنوان',
@@ -248,7 +248,7 @@ const en: typeof ar = {
   ord_done: 'Done',
   ord_cancelled: 'Cancelled',
   ord_empty_title: 'No orders yet',
-  ord_empty_sub: "You haven't placed any orders yet",
+  ord_empty_sub: "Order your first gift for someone you love — we'll take care of the rest",
   ord_count: (n: number) => `${n} orders`,
 
   status_preparing: 'Preparing',
@@ -258,7 +258,7 @@ const en: typeof ar = {
   ord_view: 'View Details',
 
   create_title: 'New Order',
-  create_hint: "Don't know what to order? Just tell us about the occasion and our experts will help you choose the perfect gift!",
+  create_hint: 'Not sure what to gift? Tell us the occasion, and our experts will handpick the perfect gift for you.',
   create_desc: 'Order Description',
   create_optional: 'Optional',
   create_desc_ph: 'Describe the occasion or what you want to gift...\nExample: Birthday gift for a 25-year-old friend',
@@ -292,15 +292,15 @@ const en: typeof ar = {
   track_live: 'Live Location Tracking',
   track_live_sub: "Delivery agent's location will appear here",
   track_cancel: 'Cancel Order',
-  track_chat: '💬 Contact Expert',
+  track_chat: 'Contact Expert',
   track_stages_title: 'Order Stages',
-  track_copy: '📋 Copy',
-  track_delivery_time: '⏰ Delivery Time',
-  track_order_date: '📅 Order Date',
-  track_amount: '💰 Amount',
+  track_copy: 'Copy',
+  track_delivery_time: 'Delivery Time',
+  track_order_date: 'Order Date',
+  track_amount: 'Amount',
 
   profile_title: 'My Profile',
-  profile_edit: '✏️ Edit',
+  profile_edit: 'Edit',
   profile_account: 'Account Info',
   profile_email: 'Email Address',
   profile_address: 'Address',

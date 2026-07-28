@@ -3,6 +3,7 @@ import {
   View, Text, StyleSheet, ScrollView, Modal,
   TouchableOpacity, Switch,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
 import { useLanguage } from '../../context/LanguageContext';
@@ -34,6 +35,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, o
         )}
         <Text style={styles.headerTitle}>{t.profile_title}</Text>
         <TouchableOpacity style={styles.editBtn}>
+          <Ionicons name="create-outline" size={14} color={C.primary} />
           <Text style={styles.editText}>{t.profile_edit}</Text>
         </TouchableOpacity>
       </View>
@@ -45,7 +47,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, o
               <Text style={styles.avatarEmoji}>{isAgent ? '🎁' : '👤'}</Text>
             </View>
             <TouchableOpacity style={styles.cameraBtn}>
-              <Text style={styles.cameraIcon}>📷</Text>
+              <Ionicons name="camera-outline" size={14} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
           <Text style={styles.userName}>{isAgent ? 'أحمد محمد - خبير الهدايا' : 'محمد أحمد'}</Text>
@@ -79,17 +81,17 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, o
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t.profile_account}</Text>
           <View style={styles.card}>
-            <MenuItem C={C} isRTL={isRTL} icon="📧" label={t.profile_email} value="example@email.com" />
+            <MenuItem C={C} isRTL={isRTL} icon="mail-outline" label={t.profile_email} value="example@email.com" />
             <View style={styles.divider} />
-            <MenuItem C={C} isRTL={isRTL} icon="🏠" label={t.profile_address} value="الرياض، السعودية" />
+            <MenuItem C={C} isRTL={isRTL} icon="location-outline" label={t.profile_address} value="الرياض، السعودية" />
             <View style={styles.divider} />
-            <MenuItem C={C} isRTL={isRTL} icon="💳" label={t.profile_payment} />
+            <MenuItem C={C} isRTL={isRTL} icon="card-outline" label={t.profile_payment} />
             {isAgent && (
               <>
                 <View style={styles.divider} />
-                <MenuItem C={C} isRTL={isRTL} icon="📊" label={t.profile_report} />
+                <MenuItem C={C} isRTL={isRTL} icon="bar-chart-outline" label={t.profile_report} />
                 <View style={styles.divider} />
-                <MenuItem C={C} isRTL={isRTL} icon="🗓️" label={t.profile_schedule} />
+                <MenuItem C={C} isRTL={isRTL} icon="calendar-outline" label={t.profile_schedule} />
               </>
             )}
           </View>
@@ -101,7 +103,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, o
             <View style={styles.toggleItem}>
               <View style={styles.toggleText}>
                 <View style={styles.menuIconWrap}>
-                  <Text style={styles.menuIcon}>🌙</Text>
+                  <Ionicons name="moon-outline" size={17} color={C.primary} />
                 </View>
                 <Text style={styles.menuLabel}>{t.profile_dark}</Text>
               </View>
@@ -116,7 +118,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, o
             <MenuItem
               C={C}
               isRTL={isRTL}
-              icon="🌐"
+              icon="language-outline"
               label={t.profile_lang}
               value={lang === 'ar' ? t.lang_ar : t.lang_en}
               onPress={() => setLangModalVisible(true)}
@@ -127,19 +129,19 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, o
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t.profile_support}</Text>
           <View style={styles.card}>
-            <MenuItem C={C} isRTL={isRTL} icon="❓" label={t.profile_help} />
+            <MenuItem C={C} isRTL={isRTL} icon="help-circle-outline" label={t.profile_help} />
             <View style={styles.divider} />
-            <MenuItem C={C} isRTL={isRTL} icon="📜" label={t.profile_terms} />
+            <MenuItem C={C} isRTL={isRTL} icon="document-text-outline" label={t.profile_terms} />
             <View style={styles.divider} />
-            <MenuItem C={C} isRTL={isRTL} icon="🔒" label={t.profile_privacy} />
+            <MenuItem C={C} isRTL={isRTL} icon="lock-closed-outline" label={t.profile_privacy} />
           </View>
         </View>
 
         <View style={styles.section}>
           <View style={styles.card}>
-            <MenuItem C={C} isRTL={isRTL} icon="🚪" label={t.profile_logout} onPress={onLogout} danger />
+            <MenuItem C={C} isRTL={isRTL} icon="log-out-outline" label={t.profile_logout} onPress={onLogout} danger />
             <View style={styles.divider} />
-            <MenuItem C={C} isRTL={isRTL} icon="🗑️" label={t.profile_delete} danger />
+            <MenuItem C={C} isRTL={isRTL} icon="trash-outline" label={t.profile_delete} danger />
           </View>
         </View>
 
@@ -185,7 +187,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ isAgent = false, o
 
 const MenuItem: React.FC<{
   C: ThemeColors;
-  icon: string;
+  icon: keyof typeof Ionicons.glyphMap;
   label: string;
   onPress?: () => void;
   value?: string;
@@ -196,7 +198,7 @@ const MenuItem: React.FC<{
   return (
     <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={0.7}>
       <View style={[styles.menuIconWrap, danger && { backgroundColor: 'rgba(219,13,13,0.1)' }]}>
-        <Text style={styles.menuIcon}>{icon}</Text>
+        <Ionicons name={icon} size={17} color={danger ? C.error : C.primary} />
       </View>
       <Text style={[styles.menuLabel, danger && { color: C.error }]}>{label}</Text>
       {value && <Text style={styles.menuValue}>{value}</Text>}
@@ -224,7 +226,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     fontSize: FontSize.lg,
     color: C.black,
   },
-  editBtn: { padding: Spacing.sm },
+  editBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: Spacing.sm },
   editText: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,
@@ -251,7 +253,6 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     backgroundColor: C.primary,
     alignItems: 'center', justifyContent: 'center',
   },
-  cameraIcon: { fontSize: 14 },
   userName: {
     fontFamily: Fonts.tajawal.bold,
     fontSize: FontSize.lg,
@@ -309,7 +310,6 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     backgroundColor: C.primaryLighter,
     alignItems: 'center', justifyContent: 'center',
   },
-  menuIcon: { fontSize: 16 },
   menuLabel: {
     flex: 1,
     fontFamily: Fonts.tajawal.regular,

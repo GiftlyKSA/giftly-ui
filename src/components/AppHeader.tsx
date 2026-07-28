@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, StatusBar, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { ThemeColors, Shadow, Spacing, Radius, Fonts, FontSize } from '../constants/colors';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -48,7 +49,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
       <View style={styles.left}>
         {isAgent ? (
           <TouchableOpacity style={styles.iconBtn} onPress={onNotificationPress}>
-            <Text style={styles.iconText}>📊</Text>
+            <Ionicons name="stats-chart-outline" size={17} color={C.primary} />
           </TouchableOpacity>
         ) : balance !== undefined ? (
           <View style={styles.balanceRow}>
@@ -98,5 +99,4 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     backgroundColor: C.gray100,
     alignItems: 'center', justifyContent: 'center',
   },
-  iconText: { fontSize: 16 },
 });
