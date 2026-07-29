@@ -54,7 +54,7 @@ export const RootNavigator: React.FC = () => {
 
   const handleTabPress = (route: string) => {
     if (route === 'new-order') {
-      go('create-order');
+      if (role !== 'agent') go('create-order');
       return;
     }
     const r = role === 'agent' ? 'agent' : 'user';
@@ -149,6 +149,7 @@ export const RootNavigator: React.FC = () => {
     return (
       <OrderTrackingScreen
         orderId={params?.orderId}
+        isAgent={role === 'agent'}
         onBack={() => go(role === 'agent' ? 'agent-home' : 'user-home')}
         onChat={() => go('chat', params)}
       />

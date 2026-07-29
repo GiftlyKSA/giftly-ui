@@ -334,7 +334,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     color: C.primary,
   },
   registerBtn: {
-    backgroundColor: C.primary,
+    backgroundColor: C.primaryButton,
     borderRadius: Radius.lg,
     paddingVertical: Spacing.base + 2,
     alignItems: 'center',

@@ -50,7 +50,7 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
           const isActive = activeRoute === tab.route;
           return (
             <React.Fragment key={tab.route}>
-              {idx === 2 && <View style={styles.fabPlaceholder} />}
+              {idx === 2 && !isAgent && <View style={styles.fabPlaceholder} />}
               <TouchableOpacity
                 style={styles.tab}
                 onPress={() => onTabPress(tab.route)}
@@ -67,11 +67,13 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
         })}
       </View>
 
-      <View style={styles.fabWrap}>
-        <TouchableOpacity style={styles.fab} activeOpacity={0.85} onPress={() => onTabPress('new-order')}>
-          <Text style={styles.fabIcon}>+</Text>
-        </TouchableOpacity>
-      </View>
+      {!isAgent && (
+        <View style={styles.fabWrap}>
+          <TouchableOpacity style={styles.fab} activeOpacity={0.85} onPress={() => onTabPress('new-order')}>
+            <Text style={styles.fabIcon}>+</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
@@ -126,7 +128,7 @@ const createStyles = (C: ThemeColors, _isRTL: boolean) => StyleSheet.create({
   },
   fab: {
     width: 58, height: 58, borderRadius: 29,
-    backgroundColor: C.primary,
+    backgroundColor: C.primaryButton,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadow.fab,

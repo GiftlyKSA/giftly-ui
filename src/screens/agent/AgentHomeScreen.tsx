@@ -108,7 +108,7 @@ export const AgentHomeScreen: React.FC<AgentHomeScreenProps> = ({ onOrderPress, 
           </View>
           <View style={styles.statsRow}>
             <StatCard icon="cash-outline" label={t.agent_earnings} value="4,980 ر.س"
-              bg={C.primary} isRTL={isRTL} textColor="#FFFFFF" subColor="rgba(255,255,255,0.8)" />
+              bg={C.primaryButton} isRTL={isRTL} textColor="#FFFFFF" subColor="rgba(255,255,255,0.8)" />
             <StatCard icon="time-outline" label={t.agent_pending} value="5"
               bg={C.primaryLighter} isRTL={isRTL} textColor={C.black} subColor={C.textSecondary} />
           </View>
@@ -240,7 +240,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     paddingVertical: Spacing.sm,
     borderRadius: Radius.lg,
   },
-  dayColActive: { backgroundColor: C.primary },
+  dayColActive: { backgroundColor: C.primaryButton },
   dayLabel: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.xs,

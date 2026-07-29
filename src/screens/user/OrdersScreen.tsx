@@ -141,7 +141,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     borderRadius: Radius.xxl,
     backgroundColor: C.gray100,
   },
-  filterBtnActive: { backgroundColor: C.primary },
+  filterBtnActive: { backgroundColor: C.primaryButton },
   filterText: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.base,

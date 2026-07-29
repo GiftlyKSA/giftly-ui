@@ -250,7 +250,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   cameraBtn: {
     position: 'absolute', bottom: 0, right: 0,
     width: 28, height: 28, borderRadius: 14,
-    backgroundColor: C.primary,
+    backgroundColor: C.primaryButton,
     alignItems: 'center', justifyContent: 'center',
   },
   userName: {

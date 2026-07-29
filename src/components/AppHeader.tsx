@@ -77,7 +77,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   balanceRow: { flexDirection: isRTL ? 'row' : 'row-reverse', alignItems: 'center' },
   balanceAmount: { fontFamily: Fonts.tajawal.bold, fontSize: 22, color: C.primary },
   balanceCurrency: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.base, color: C.primary },
-  profileRow: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', gap: Spacing.sm },
+  profileRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   textCol: { alignItems: isRTL ? 'flex-end' : 'flex-start' },
   greeting: {
     fontFamily: Fonts.tajawal.bold,

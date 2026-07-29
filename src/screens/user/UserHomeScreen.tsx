@@ -200,7 +200,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   },
   section: { marginBottom: Spacing.xl, paddingHorizontal: Spacing.xl },
   sectionHeader: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.base,
@@ -228,7 +228,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     paddingVertical: Spacing.sm,
     borderRadius: Radius.lg,
   },
-  dayColActive: { backgroundColor: C.primary },
+  dayColActive: { backgroundColor: C.primaryButton },
   dayLabel: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.xs,
@@ -280,7 +280,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     color: C.primary,
   },
   prepBtn: {
-    backgroundColor: C.primary,
+    backgroundColor: C.primaryButton,
     borderRadius: Radius.sm,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 5,

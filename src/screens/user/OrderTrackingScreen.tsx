@@ -11,6 +11,7 @@ import { useTopInset } from '../../hooks/useTopInset';
 
 interface OrderTrackingScreenProps {
   orderId?: string;
+  isAgent?: boolean;
   onBack: () => void;
   onChat: () => void;
 }
@@ -22,7 +23,7 @@ const STAGE_DONE = [true, true, true, false, false];
 const STAGE_ACTIVE = [false, false, false, true, false];
 
 export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
-  orderId = 'ORD-593821', onBack, onChat,
+  orderId = 'ORD-593821', isAgent = false, onBack, onChat,
 }) => {
   const { C } = useTheme();
   const { t, lang } = useLanguage();
@@ -150,7 +151,7 @@ export const OrderTrackingScreen: React.FC<OrderTrackingScreenProps> = ({
           </TouchableOpacity>
           <TouchableOpacity style={styles.chatActionBtn} onPress={onChat}>
             <Ionicons name="chatbubbles-outline" size={16} color="#FFFFFF" />
-            <Text style={styles.chatActionText}>{t.track_chat}</Text>
+            <Text style={styles.chatActionText}>{isAgent ? t.track_chat_agent : t.track_chat}</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -304,9 +305,9 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     position: 'absolute',
     right: isRTL ? 19 : undefined,
     left: isRTL ? undefined : 19,
-    top: 36,
+    top: 40,
+    bottom: -Spacing.base,
     width: 2,
-    height: '100%',
     backgroundColor: C.gray200,
   },
   stageLineDone: { backgroundColor: C.primary },
@@ -316,7 +317,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   stageDotDone: { backgroundColor: C.primaryLighter },
-  stageDotActive: { backgroundColor: C.primary },
+  stageDotActive: { backgroundColor: C.primaryButton },
   stageContent: { flex: 1, paddingTop: 8, alignItems: isRTL ? 'flex-end' : 'flex-start' },
   stageLabel: {
     fontFamily: Fonts.tajawal.regular,
@@ -372,7 +373,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     gap: 6,
-    backgroundColor: C.primary,
+    backgroundColor: C.primaryButton,
     borderRadius: Radius.lg,
     paddingVertical: Spacing.md,
     alignItems: 'center',

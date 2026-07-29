@@ -4,6 +4,7 @@ import {
   TouchableOpacity, KeyboardAvoidingView, Platform,
   TouchableWithoutFeedback, Keyboard,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
 import { useTheme } from '../../context/ThemeContext';
@@ -40,6 +41,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
   const isRTL = lang === 'ar';
   const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
   const topPadding = useTopInset();
+  const { bottom: bottomInset } = useSafeAreaInsets();
 
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
@@ -92,7 +94,7 @@ export const ChatScreen: React.FC<ChatScreenProps> = ({
         onContentSizeChange={() => flatRef.current?.scrollToEnd()}
       />
 
-      <View style={styles.inputBar}>
+      <View style={[styles.inputBar, { paddingBottom: Math.max(Spacing.sm, bottomInset) }]}>
         <TouchableOpacity style={styles.attachBtn}>
           <Ionicons name="attach-outline" size={22} color={C.gray600} />
         </TouchableOpacity>
@@ -211,7 +213,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
     padding: Spacing.md,
   },
   bubbleUser: {
-    backgroundColor: C.primary,
+    backgroundColor: C.primaryButton,
     borderBottomRightRadius: isRTL ? 4 : Radius.lg,
     borderBottomLeftRadius: isRTL ? Radius.lg : 4,
   },
@@ -267,7 +269,7 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   attachBtn: { padding: Spacing.sm },
   sendBtn: {
     width: 40, height: 40, borderRadius: 20,
-    backgroundColor: C.primary,
+    backgroundColor: C.primaryButton,
     alignItems: 'center', justifyContent: 'center',
   },
   sendBtnDisabled: { backgroundColor: C.gray300 },

@@ -37,6 +37,7 @@ export type ThemeColors = typeof lightColors;
 
 export const lightColors = {
   primary: '#673195',
+  primaryButton: '#673195',
   primaryLight: '#C9AEEC',
   primaryLighter: '#F3EFFF',
   primaryMid: '#934AD2',
@@ -72,36 +73,43 @@ export const lightColors = {
   shadowDark: 'rgba(0,0,0,0.25)',
 };
 
+// Dark palette — tuned against WCAG 2.1 contrast ratios (see notes):
+//  - No pure black background (#000000) or pure white text (#FFFFFF).
+//  - Body/label text: >= 4.5:1 (AA, normal text). Large/bold headings: >= 3:1.
+//  - `primary` (text/icons on dark surfaces) and `primaryButton` (solid
+//    button fills carrying white text) are intentionally two different
+//    shades — a single purple can't clear 4.5:1 in both directions at once.
 export const darkColors: ThemeColors = {
-  primary: '#A876E0',
-  primaryLight: '#7A48AD',
-  primaryLighter: '#2B1A44',
-  primaryMid: '#B070E8',
+  primary: '#A979E0',        // text/icons on dark surfaces — 5.65:1 on bgPage, 5.07:1 on bgCard
+  primaryButton: '#7A30CF',  // solid button fill — white text on it is 6.66:1
+  primaryLight: '#281839',   // avatar/icon-wrap tint — primary-colored text on it is 5.08:1
+  primaryLighter: '#251C36', // card/badge tint — darkened so it no longer glares on black
+  primaryMid: '#9B5FD8',
   primaryAccent: '#C090EE',
 
-  success: '#1AE08A',
-  successBg: '#0A2E1A',
+  success: '#3DDB93',
+  successBg: '#0F3324',
   info: '#3090D8',
   infoBg: 'rgba(48,144,216,0.15)',
-  error: '#FF6B6B',
+  error: '#FF6B6B',          // 6.58:1 on bgPage, 5.90:1 on bgCard
   warning: '#FFB020',
   teal: '#30AFA5',
   tealDark: '#1D9C82',
 
-  black: '#F2F2F7',          // primary text
-  white: '#1E1E2C',          // card / surface background (kept distinct from page bg)
-  dark: '#D8D8E2',
-  gray100: '#15151F',        // soft fill (chat canvas, input fields) — a step below card surfaces
-  gray200: '#2E2E40',        // borders
-  gray300: '#3C3C50',
-  gray400: '#54545F',
-  gray500: '#84869A',
-  gray600: '#A8AAB8',
-  textSecondary: 'rgba(216,216,226,0.75)',
-  textTertiary: 'rgba(216,216,226,0.45)',
+  black: '#ECECF1',          // primary text — 15.51:1 on bgPage (off-white, not pure #FFF)
+  white: '#211E29',          // card / surface background — distinct step above bgPage
+  dark: '#DCD6E4',
+  gray100: '#1C1A22',        // soft fill (chat canvas, input fields) — a step below card surfaces
+  gray200: '#332F3F',        // borders
+  gray300: '#413C4D',
+  gray400: '#5A5468',
+  gray500: '#8A8496',        // 5.06:1 on bgPage, 4.54:1 on bgCard — safe for small icons/labels
+  gray600: '#B0AABC',
+  textSecondary: 'rgba(214,214,226,0.72)', // ~7.0:1 on bgPage, ~6.5:1 on bgCard
+  textTertiary: 'rgba(214,214,226,0.55)',  // ~4.6:1 on bgPage — least-emphasis text, still AA
 
-  bgCard: '#1E1E2C',
-  bgPage: '#0D0D14',
+  bgCard: '#211E29',
+  bgPage: '#16141B',         // warm dark gray, not pure black
   bgOverlay: 'rgba(0,0,0,0.55)',
 
   shadowPurple: 'rgba(155,95,216,0.18)',

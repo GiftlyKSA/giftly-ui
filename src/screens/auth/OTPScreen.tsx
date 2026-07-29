@@ -133,7 +133,7 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
   },
   otpBoxFilled: { borderColor: C.primary, backgroundColor: C.primaryLighter },
   verifyBtn: {
-    backgroundColor: C.primary, borderRadius: Radius.lg,
+    backgroundColor: C.primaryButton, borderRadius: Radius.lg,
     paddingVertical: Spacing.base + 2,
     paddingHorizontal: Spacing.xxxl + Spacing.xl,
     marginBottom: Spacing.base,
