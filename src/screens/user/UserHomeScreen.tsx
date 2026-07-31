@@ -1,92 +1,50 @@
-import React, { useState, useMemo } from 'react';
-import {
-  View, Text, StyleSheet, ScrollView,
-  TouchableOpacity, FlatList,
-} from 'react-native';
-import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
-import { useTheme } from '../../context/ThemeContext';
-import { useLanguage } from '../../context/LanguageContext';
+import React, { useMemo, useState } from 'react';
+import { FlatList, RefreshControl, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useQuery } from '@tanstack/react-query';
+import { getErrorMessage } from '../../api/client';
+import { getWallet, listOrders } from '../../api/giftly';
 import { AppHeader } from '../../components/AppHeader';
-import { OrderCard } from '../../components/OrderCard';
 import { BottomTabBar } from '../../components/BottomTabBar';
+import { OrderCard } from '../../components/OrderCard';
+import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../../constants/colors';
+import { useAuth } from '../../auth/AuthProvider';
+import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
+import { formatOrderDate, orderTitle } from '../../utils/orders';
 
 interface UserHomeScreenProps {
   onOrderPress: (orderId: string) => void;
   onTabPress: (route: string) => void;
 }
 
-const WEEK_DATES = [9, 10, 11, 12, 13, 14, 15];
-
-const ORDERS = [
-  { id: 'ORD-593821', eventName: 'يوم ميلاد', status: 'preparing' as const, time: '12.00 - 16.00', messageCount: 20 },
-  { id: 'ORD-593822', eventName: 'يوم تخرج', status: 'delivering' as const, time: '10.00 - 14.00', messageCount: 5 },
-];
-
 const GiftCard: React.FC<{ title: string; price: string; tag: string }> = ({ title, price, tag }) => {
   const { C } = useTheme();
-  const { t, lang } = useLanguage();
-  const isRTL = lang === 'ar';
-  const styles = useMemo(() => createGiftCardStyles(C, isRTL), [C, isRTL]);
+  const styles = useMemo(() => createGiftCardStyles(C), [C]);
   return (
     <View style={styles.card}>
-      <View style={styles.img}>
-        <Text style={styles.imgEmoji}>🎁</Text>
-      </View>
-      <View style={styles.tagWrap}>
-        <Text style={styles.tag}>{tag}</Text>
-      </View>
+      <View style={styles.image}><Text style={styles.imageText}>G</Text></View>
+      <Text style={styles.tag}>{tag}</Text>
       <Text style={styles.title} numberOfLines={2}>{title}</Text>
-      <Text style={styles.price}>{price}{t.gift_currency}</Text>
+      <Text style={styles.price}>{price}</Text>
     </View>
   );
 };
 
-const createGiftCardStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
-  card: {
-    width: 160,
-    backgroundColor: C.white,
-    borderRadius: Radius.xl,
-    marginLeft: isRTL ? Spacing.base : 0,
-    marginRight: isRTL ? 0 : Spacing.base,
-    padding: Spacing.sm,
-    ...Shadow.card,
-  },
-  img: {
-    height: 120, borderRadius: Radius.lg,
-    backgroundColor: C.primaryLighter,
-    alignItems: 'center', justifyContent: 'center',
-    marginBottom: Spacing.sm,
-  },
-  imgEmoji: { fontSize: 48 },
-  tagWrap: {
-    backgroundColor: C.primaryLighter,
-    borderRadius: Radius.sm,
-    paddingHorizontal: 8, paddingVertical: 3,
-    alignSelf: 'flex-start', marginBottom: 4,
-  },
-  tag: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.xs, color: C.primary },
-  title: {
-    fontFamily: Fonts.tajawal.bold,
-    fontSize: FontSize.sm,
-    color: C.black,
-    textAlign: 'left',
-    marginBottom: 4,
-  },
-  price: {
-    fontFamily: Fonts.tajawal.bold,
-    fontSize: FontSize.base,
-    color: C.primary,
-    textAlign: 'left',
-  },
-});
-
 export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, onTabPress }) => {
   const { C } = useTheme();
   const { t, lang } = useLanguage();
+  const { profile } = useAuth();
   const isRTL = lang === 'ar';
   const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
-  const [activeDay, setActiveDay] = useState(0);
   const [activeTab, setActiveTab] = useState('home');
+
+  const walletQuery = useQuery({ queryKey: ['wallet'], queryFn: ({ signal }) => getWallet(signal) });
+  const ordersQuery = useQuery({ queryKey: ['orders', 'recent'], queryFn: ({ signal }) => listOrders({ limit: 3 }, signal) });
+  const isRefreshing = walletQuery.isRefetching || ordersQuery.isRefetching;
+
+  const refresh = () => {
+    void Promise.all([walletQuery.refetch(), ordersQuery.refetch()]);
+  };
 
   const handleTab = (route: string) => {
     setActiveTab(route);
@@ -95,208 +53,82 @@ export const UserHomeScreen: React.FC<UserHomeScreenProps> = ({ onOrderPress, on
 
   return (
     <View style={styles.root}>
-      <AppHeader userName="محمد" balance="9536" onProfilePress={() => {}} />
-
-      <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
-        <View style={styles.heroSection}>
-          <Text style={styles.heroText}>{t.home_hero}</Text>
-        </View>
+      <AppHeader
+        userName={profile?.full_name || 'Giftly'}
+        balance={walletQuery.data?.available}
+        onProfilePress={() => onTabPress('profile')}
+      />
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={refresh} tintColor={C.primary} />}
+      >
+        <View style={styles.heroSection}><Text style={styles.heroText}>{t.home_hero}</Text></View>
 
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t.home_featured}</Text>
-            <TouchableOpacity><Text style={styles.seeAll}>{t.home_see_all}</Text></TouchableOpacity>
-          </View>
+          <View style={styles.sectionHeader}><Text style={styles.sectionTitle}>{t.home_featured}</Text></View>
           <FlatList
             horizontal
-            inverted={isRTL}
             data={t.gifts}
-            renderItem={({ item }) => <GiftCard {...item} />}
-            keyExtractor={(_, i) => i.toString()}
+            renderItem={({ item }) => <GiftCard title={item.title} price={`${item.price} ${t.gift_currency}`} tag={item.tag} />}
+            keyExtractor={(_, index) => String(index)}
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={isRTL ? { paddingRight: Spacing.xl } : { paddingLeft: Spacing.xl }}
+            contentContainerStyle={styles.giftList}
           />
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>{t.home_upcoming}</Text>
-            <TouchableOpacity><Text style={styles.seeAll}>{t.home_full_cal}</Text></TouchableOpacity>
-          </View>
-          <View style={styles.weekRow}>
-            {t.days.map((day, idx) => (
-              <TouchableOpacity
-                key={idx}
-                style={[styles.dayCol, activeDay === idx && styles.dayColActive]}
-                onPress={() => setActiveDay(idx)}
-              >
-                <Text style={[styles.dayLabel, activeDay === idx && styles.dayLabelActive]}>{day}</Text>
-                <Text style={[styles.dayNum, activeDay === idx && styles.dayNumActive]}>{WEEK_DATES[idx]}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          {t.upcoming_events.map(event => (
-            <View key={event.id} style={styles.eventCard}>
-              <View style={styles.prepBtn}>
-                <Text style={styles.prepBtnText}>{t.home_prepare}</Text>
-              </View>
-              <View style={styles.eventContent}>
-                <Text style={styles.eventTitle}>{event.title}</Text>
-                <View style={styles.eventTimeRow}>
-                  <Text style={styles.eventDate}>⏰ {event.date}</Text>
-                  <Text style={styles.eventDays}> {t.days_left(event.daysLeft)}</Text>
-                </View>
-              </View>
-              <View style={styles.eventIconWrap}>
-                <Text style={styles.eventIcon}>{event.icon}</Text>
-              </View>
-            </View>
-          ))}
+          <Text style={styles.localDataNote}>Featured gifts are currently local content; the backend has no catalogue endpoint.</Text>
         </View>
 
         <View style={styles.section}>
           <View style={[styles.ordersCard, Shadow.card]}>
-            <Text style={styles.ordersTitle}>{t.home_orders}</Text>
-            {ORDERS.map(order => (
+            <View style={styles.sectionHeader}>
+              <Text style={styles.ordersTitle}>{t.home_orders}</Text>
+              <TouchableOpacity onPress={() => onTabPress('orders')}><Text style={styles.seeAll}>{t.home_see_all}</Text></TouchableOpacity>
+            </View>
+            {ordersQuery.isLoading ? <Text style={styles.stateText}>Loading orders…</Text> : null}
+            {ordersQuery.isError ? <Text style={styles.error}>{getErrorMessage(ordersQuery.error)}</Text> : null}
+            {ordersQuery.data?.items.map(order => (
               <OrderCard
                 key={order.id}
                 orderId={order.id}
-                eventName={order.eventName}
+                eventName={orderTitle(order)}
                 status={order.status}
-                time={order.time}
-                messageCount={order.messageCount}
+                time={formatOrderDate(order.delivery_date, lang)}
                 onPress={() => onOrderPress(order.id)}
                 onViewDetails={() => onOrderPress(order.id)}
               />
             ))}
+            {!ordersQuery.isLoading && !ordersQuery.isError && ordersQuery.data?.items.length === 0 ? <Text style={styles.stateText}>{t.ord_empty_title}</Text> : null}
           </View>
         </View>
       </ScrollView>
-
-      <BottomTabBar activeRoute={activeTab} onTabPress={handleTab} isAgent={false} />
+      <BottomTabBar activeRoute={activeTab} onTabPress={handleTab} />
     </View>
   );
 };
 
+const createGiftCardStyles = (C: ThemeColors) => StyleSheet.create({
+  card: { width: 160, backgroundColor: C.white, borderRadius: Radius.xl, marginRight: Spacing.base, padding: Spacing.sm, ...Shadow.card },
+  image: { height: 100, borderRadius: Radius.lg, backgroundColor: C.primaryLighter, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.sm },
+  imageText: { fontFamily: Fonts.inter.bold, fontSize: 38, color: C.primary },
+  tag: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.xs, color: C.primary, marginBottom: 4 },
+  title: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.sm, color: C.black, marginBottom: 4 },
+  price: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.base, color: C.primary },
+});
+
 const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bgPage },
   scroll: { flex: 1 },
-  heroSection: {
-    paddingHorizontal: Spacing.xl,
-    paddingVertical: Spacing.xl,
-    alignItems: isRTL ? 'flex-end' : 'flex-start',
-  },
-  heroText: {
-    fontFamily: Fonts.tajawal.bold,
-    fontSize: FontSize.xxxl,
-    color: C.black,
-    textAlign: isRTL ? 'right' : 'left',
-    lineHeight: 36,
-  },
+  content: { paddingBottom: 110 },
+  heroSection: { paddingHorizontal: Spacing.xl, paddingVertical: Spacing.xl, alignItems: isRTL ? 'flex-end' : 'flex-start' },
+  heroText: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.xxxl, color: C.black, textAlign: isRTL ? 'right' : 'left', lineHeight: 36 },
   section: { marginBottom: Spacing.xl, paddingHorizontal: Spacing.xl },
-  sectionHeader: {
-    flexDirection: isRTL ? 'row-reverse' : 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: Spacing.base,
-  },
-  sectionTitle: {
-    fontFamily: Fonts.tajawal.bold,
-    fontSize: FontSize.md,
-    color: C.black,
-  },
-  seeAll: {
-    fontFamily: Fonts.tajawal.regular,
-    fontSize: FontSize.sm,
-    color: C.primary,
-  },
-  weekRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: C.gray100,
-    borderRadius: Radius.xl,
-    padding: Spacing.xs,
-  },
-  dayCol: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: Spacing.sm,
-    borderRadius: Radius.lg,
-  },
-  dayColActive: { backgroundColor: C.primary },
-  dayLabel: {
-    fontFamily: Fonts.tajawal.regular,
-    fontSize: FontSize.xs,
-    color: C.textSecondary,
-    marginBottom: 2,
-  },
-  dayLabelActive: { color: '#FFFFFF' },
-  dayNum: {
-    fontFamily: Fonts.tajawal.bold,
-    fontSize: FontSize.sm,
-    color: C.black,
-  },
-  dayNumActive: { color: '#FFFFFF' },
-  eventCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: C.white,
-    borderRadius: Radius.lg,
-    borderWidth: 3,
-    borderColor: C.primary,
-    padding: Spacing.md,
-    marginBottom: Spacing.sm,
-    gap: Spacing.sm,
-    ...Shadow.card,
-  },
-  eventIconWrap: {
-    width: 40, height: 40, borderRadius: Radius.md,
-    backgroundColor: C.primaryLighter,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  eventIcon: { fontSize: 20 },
-  eventContent: { flex: 1, alignItems: isRTL ? 'flex-end' : 'flex-start' },
-  eventTitle: {
-    fontFamily: Fonts.tajawal.bold,
-    fontSize: FontSize.base,
-    color: C.black,
-    textAlign: isRTL ? 'right' : 'left',
-  },
-  eventTimeRow: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', marginTop: 4 },
-  eventDate: {
-    fontFamily: Fonts.inter.regular,
-    fontSize: FontSize.xs,
-    color: C.gray500,
-  },
-  eventDays: {
-    fontFamily: Fonts.tajawal.regular,
-    fontSize: FontSize.xs,
-    color: C.primary,
-  },
-  prepBtn: {
-    backgroundColor: C.primary,
-    borderRadius: Radius.sm,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 5,
-  },
-  prepBtnText: {
-    fontFamily: Fonts.tajawal.bold,
-    fontSize: FontSize.xs,
-    color: '#FFFFFF',
-  },
-  ordersCard: {
-    backgroundColor: C.white,
-    borderRadius: Radius.xl,
-    padding: Spacing.base,
-  },
-  ordersTitle: {
-    fontFamily: Fonts.tajawal.bold,
-    fontSize: FontSize.md,
-    color: C.primary,
-    textAlign: isRTL ? 'right' : 'left',
-    marginBottom: Spacing.base,
-  },
+  sectionHeader: { flexDirection: isRTL ? 'row-reverse' : 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.base },
+  sectionTitle: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.md, color: C.black },
+  seeAll: { fontFamily: Fonts.tajawal.regular, fontSize: FontSize.sm, color: C.primary },
+  giftList: { paddingRight: Spacing.xs },
+  localDataNote: { fontFamily: Fonts.tajawal.regular, fontSize: FontSize.xs, color: C.textSecondary, marginTop: Spacing.sm, textAlign: isRTL ? 'right' : 'left' },
+  ordersCard: { backgroundColor: C.white, borderRadius: Radius.xl, padding: Spacing.base },
+  ordersTitle: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.md, color: C.primary },
+  stateText: { fontFamily: Fonts.tajawal.regular, color: C.textSecondary, textAlign: isRTL ? 'right' : 'left', paddingVertical: Spacing.base },
+  error: { fontFamily: Fonts.tajawal.regular, color: C.error, textAlign: isRTL ? 'right' : 'left', paddingVertical: Spacing.base },
 });

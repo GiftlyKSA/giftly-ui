@@ -3,30 +3,38 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ThemeColors, Spacing, Radius, Shadow, Fonts, FontSize } from '../constants/colors';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { OrderStatus } from '../api/types';
+import { statusLabel } from '../utils/orders';
 
 interface OrderCardProps {
   orderId: string;
   eventName: string;
-  status: 'preparing' | 'delivering' | 'delivered' | 'cancelled';
+  status: OrderStatus;
   time?: string;
   messageCount?: number;
   onPress?: () => void;
   onViewDetails?: () => void;
+  actionLabel?: string;
 }
 
 export const OrderCard: React.FC<OrderCardProps> = ({
-  orderId, eventName, status, time, messageCount = 0, onPress, onViewDetails,
+  orderId, eventName, status, time, messageCount = 0, onPress, onViewDetails, actionLabel,
 }) => {
   const { C } = useTheme();
   const { t, lang } = useLanguage();
   const isRTL = lang === 'ar';
   const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
 
-  const statusConfig = {
-    preparing: { label: t.status_preparing, color: C.info, bg: C.infoBg },
-    delivering: { label: t.status_delivering, color: '#4CAF50', bg: 'rgba(76,175,80,0.2)' },
-    delivered: { label: t.status_delivered, color: C.teal, bg: 'rgba(38,143,133,0.2)' },
-    cancelled: { label: t.status_cancelled, color: C.error, bg: 'rgba(219,13,13,0.1)' },
+  const statusConfig: Record<OrderStatus, { label: string; color: string; bg: string }> = {
+    NEW: { label: statusLabel(status), color: C.info, bg: C.infoBg },
+    ASSIGNED: { label: statusLabel(status), color: C.info, bg: C.infoBg },
+    WAITING_PAYMENT: { label: statusLabel(status), color: '#B7791F', bg: 'rgba(183,121,31,0.12)' },
+    IN_PROGRESS: { label: statusLabel(status), color: '#4CAF50', bg: 'rgba(76,175,80,0.2)' },
+    DELIVERED: { label: statusLabel(status), color: C.teal, bg: 'rgba(38,143,133,0.2)' },
+    COMPLETED: { label: statusLabel(status), color: C.teal, bg: 'rgba(38,143,133,0.2)' },
+    CANCELLED: { label: statusLabel(status), color: C.error, bg: 'rgba(219,13,13,0.1)' },
+    DISPUTED: { label: statusLabel(status), color: '#C05621', bg: 'rgba(192,86,33,0.12)' },
+    REFUNDED: { label: statusLabel(status), color: C.textSecondary, bg: C.gray100 },
   };
 
   const cfg = statusConfig[status];
@@ -41,9 +49,11 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         <Text style={styles.orderId}>{orderId}</Text>
         <Text style={styles.eventName}>{eventName}</Text>
         {time ? <Text style={styles.time}>{time}</Text> : null}
-        <TouchableOpacity onPress={onViewDetails}>
-          <Text style={styles.viewDetails}>{t.ord_view}</Text>
-        </TouchableOpacity>
+        {onViewDetails ? (
+          <TouchableOpacity onPress={onViewDetails}>
+            <Text style={styles.viewDetails}>{actionLabel ?? t.ord_view}</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       <View style={styles.right}>

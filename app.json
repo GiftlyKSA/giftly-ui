@@ -4,37 +4,27 @@
     "slug": "giftly",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#673195"
-    },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.giftly.app"
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#673195"
-      },
       "package": "com.giftly.app"
     },
     "web": {
-      "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
     "plugins": [
-      "expo-router",
-      "expo-font"
+      "expo-font",
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Giftly uses your location to create and fulfill delivery requests."
+        }
+      ]
     ],
-    "scheme": "giftly",
-    "extra": {
-      "router": {
-        "origin": false
-      }
-    }
+    "scheme": "giftly"
   }
 }

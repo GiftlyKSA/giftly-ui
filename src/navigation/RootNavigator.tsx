@@ -1,178 +1,163 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { register, sendOtp, verifyOtp } from '../api/auth';
+import { RegistrationForm, UserProfile } from '../api/types';
+import { useAuth } from '../auth/AuthProvider';
 import OnboardingScreen from '../screens/auth/OnboardingScreen';
 import { LoginScreen } from '../screens/auth/LoginScreen';
 import { RegisterScreen } from '../screens/auth/RegisterScreen';
 import { OTPScreen } from '../screens/auth/OTPScreen';
-import { UserHomeScreen } from '../screens/user/UserHomeScreen';
 import { AgentHomeScreen } from '../screens/agent/AgentHomeScreen';
+import { PendingVerificationScreen } from '../screens/agent/PendingVerificationScreen';
+import { ChatScreen } from '../screens/user/ChatScreen';
 import { CreateOrderScreen } from '../screens/user/CreateOrderScreen';
-import { WaitingScreen } from '../screens/user/WaitingScreen';
 import { OrderTrackingScreen } from '../screens/user/OrderTrackingScreen';
 import { OrdersScreen } from '../screens/user/OrdersScreen';
-import { ChatScreen } from '../screens/user/ChatScreen';
 import { ProfileScreen } from '../screens/user/ProfileScreen';
+import { UserHomeScreen } from '../screens/user/UserHomeScreen';
+import { WaitingScreen } from '../screens/user/WaitingScreen';
 
 type Screen =
-  | 'onboarding' | 'login' | 'register' | 'otp'
-  | 'user-home' | 'agent-home'
-  | 'create-order' | 'waiting'
-  | 'user-orders' | 'agent-orders'
-  | 'order-tracking' | 'chat'
-  | 'user-profile' | 'agent-profile';
+  | 'onboarding'
+  | 'login'
+  | 'register'
+  | 'otp'
+  | 'user-home'
+  | 'agent-home'
+  | 'pending-verification'
+  | 'create-order'
+  | 'waiting'
+  | 'user-orders'
+  | 'agent-orders'
+  | 'order-tracking'
+  | 'chat'
+  | 'user-profile'
+  | 'agent-profile';
 
 interface NavState {
   screen: Screen;
   params?: Record<string, string>;
 }
 
+interface PendingOtp {
+  phone: string;
+  expiresIn: number;
+}
+
 export const RootNavigator: React.FC = () => {
+  const { phase, profile, signIn, signOut } = useAuth();
   const [nav, setNav] = useState<NavState>({ screen: 'onboarding' });
-  const [role, setRole] = useState<'user' | 'agent' | 'new'>('new');
-  const [loginPhone, setLoginPhone] = useState('');
+  const [pendingOtp, setPendingOtp] = useState<PendingOtp | null>(null);
+  const [registrationToken, setRegistrationToken] = useState<string | null>(null);
+  const isInitialAuthRestore = useRef(true);
 
-  const go = (screen: Screen, params?: Record<string, string>) =>
-    setNav({ screen, params });
+  const go = (screen: Screen, params?: Record<string, string>) => setNav({ screen, params });
 
-  const handleLogin = (phone: string) => {
-    const stripped = phone.replace(/\s/g, '');
-    setLoginPhone(stripped);
-    if (stripped === '555555555') {
-      setRole('user');
-    } else if (stripped === '555555558') {
-      setRole('agent');
-    } else {
-      setRole('new');
+  const routeAuthenticated = (nextProfile: UserProfile) => {
+    if (nextProfile.status === 'BANNED') {
+      void signOut();
+      go('login');
+      return;
     }
+    if (nextProfile.role === 'COURIER' && nextProfile.status === 'PENDING_VERIFICATION') {
+      go('pending-verification');
+      return;
+    }
+    go(nextProfile.role === 'COURIER' ? 'agent-home' : 'user-home');
+  };
+
+  useEffect(() => {
+    if (phase !== 'authenticated' || !profile || !isInitialAuthRestore.current) return;
+    isInitialAuthRestore.current = false;
+    routeAuthenticated(profile);
+  }, [phase, profile]);
+
+  useEffect(() => {
+    const protectedScreen = !['onboarding', 'login', 'otp', 'register'].includes(nav.screen);
+    if (phase === 'guest' && protectedScreen) go('login');
+  }, [nav.screen, phase]);
+
+  const handleLogin = async (phone: string) => {
+    const response = await sendOtp(phone);
+    setPendingOtp({ phone, expiresIn: response.expires_in });
     go('otp');
   };
 
-  const handleOtpVerify = () => {
-    if (role === 'agent') go('agent-home');
-    else if (role === 'user') go('user-home');
-    else go('register'); // new user → fill registration form after OTP
+  const handleResend = async () => {
+    if (!pendingOtp) throw new Error('Start a new sign-in request first.');
+    const response = await sendOtp(pendingOtp.phone);
+    setPendingOtp(current => current ? { ...current, expiresIn: response.expires_in } : current);
+  };
+
+  const handleOtpVerify = async (otp: string) => {
+    if (!pendingOtp) throw new Error('Start a new sign-in request first.');
+    const response = await verifyOtp(pendingOtp.phone, otp);
+    if (response.is_new_user) {
+      if (!response.registration_token) throw new Error('The registration handoff was not provided.');
+      setRegistrationToken(response.registration_token);
+      go('register');
+      return;
+    }
+    if (!response.access_token || !response.refresh_token || !response.role) {
+      throw new Error('The sign-in response was incomplete.');
+    }
+    const nextProfile = await signIn({
+      access_token: response.access_token,
+      refresh_token: response.refresh_token,
+      role: response.role,
+    });
+    routeAuthenticated(nextProfile);
+  };
+
+  const handleRegister = async (form: RegistrationForm) => {
+    if (!registrationToken) throw new Error('Start registration again to obtain a new token.');
+    const session = await register(registrationToken, form);
+    setRegistrationToken(null);
+    const nextProfile = await signIn(session);
+    routeAuthenticated(nextProfile);
   };
 
   const handleTabPress = (route: string) => {
+    const isCourier = profile?.role === 'COURIER';
     if (route === 'new-order') {
-      go('create-order');
+      if (!isCourier) go('create-order');
       return;
     }
-    const r = role === 'agent' ? 'agent' : 'user';
-    if (r === 'user') {
-      if (route === 'home') go('user-home');
-      else if (route === 'orders') go('user-orders');
-      else if (route === 'chat') go('chat');
-      else if (route === 'profile') go('user-profile');
-    } else {
-      if (route === 'home') go('agent-home');
-      else if (route === 'orders') go('agent-orders');
-      else if (route === 'profile') go('agent-profile');
-    }
+    if (route === 'home') go(isCourier ? 'agent-home' : 'user-home');
+    else if (route === 'orders') go(isCourier ? 'agent-orders' : 'user-orders');
+    else if (route === 'chat') go('chat');
+    else if (route === 'profile') go(isCourier ? 'agent-profile' : 'user-profile');
   };
 
-  const { screen, params } = nav;
+  const goLogin = () => {
+    setPendingOtp(null);
+    setRegistrationToken(null);
+    go('login');
+  };
 
-  if (screen === 'onboarding') {
-    return <OnboardingScreen onFinish={() => go('login')} />;
+  if (phase === 'restoring') {
+    return <View style={styles.loading}><ActivityIndicator /></View>;
   }
 
-  if (screen === 'login') {
-    return <LoginScreen onLogin={handleLogin} />;
-  }
+  const isAgent = profile?.role === 'COURIER';
 
-  if (screen === 'otp') {
-    return (
-      <OTPScreen
-        phone={`+966 ${loginPhone}`}
-        onVerify={handleOtpVerify}
-        onResend={() => {}}
-      />
-    );
-  }
+  if (nav.screen === 'onboarding') return <OnboardingScreen onFinish={() => go('login')} />;
+  if (nav.screen === 'login') return <LoginScreen onLogin={handleLogin} />;
+  if (nav.screen === 'otp' && pendingOtp) return <OTPScreen phone={pendingOtp.phone} expiresIn={pendingOtp.expiresIn} onVerify={handleOtpVerify} onResend={handleResend} />;
+  if (nav.screen === 'register' && pendingOtp && registrationToken) return <RegisterScreen phone={pendingOtp.phone} onRegister={handleRegister} onGoLogin={goLogin} />;
+  if (nav.screen === 'pending-verification') return <PendingVerificationScreen onVerified={() => go('agent-home')} onLogout={async () => goLogin()} />;
+  if (nav.screen === 'user-home') return <UserHomeScreen onOrderPress={orderId => go('order-tracking', { orderId })} onTabPress={handleTabPress} />;
+  if (nav.screen === 'agent-home') return <AgentHomeScreen onOrderPress={orderId => go('order-tracking', { orderId })} onTabPress={handleTabPress} />;
+  if (nav.screen === 'create-order') return <CreateOrderScreen onCreated={orderId => go('waiting', { orderId })} onBack={() => go('user-home')} />;
+  if (nav.screen === 'waiting' && nav.params?.orderId) return <WaitingScreen orderId={nav.params.orderId} onAssigned={orderId => go('order-tracking', { orderId })} onBackHome={() => go('user-home')} />;
+  if (nav.screen === 'user-orders' || nav.screen === 'agent-orders') return <OrdersScreen isAgent={isAgent} onOrderPress={orderId => go('order-tracking', { orderId })} onTabPress={handleTabPress} />;
+  if (nav.screen === 'order-tracking' && nav.params?.orderId) return <OrderTrackingScreen orderId={nav.params.orderId} isAgent={isAgent} onBack={() => go(isAgent ? 'agent-home' : 'user-home')} onChat={() => go('chat', nav.params)} />;
+  if (nav.screen === 'chat') return <ChatScreen conversationId={nav.params?.conversationId} orderId={nav.params?.orderId} onBack={() => go(isAgent ? 'agent-home' : 'user-home')} />;
+  if (nav.screen === 'user-profile' || nav.screen === 'agent-profile') return <ProfileScreen isAgent={isAgent} onBack={() => go(isAgent ? 'agent-home' : 'user-home')} onLogout={async () => goLogin()} />;
 
-  if (screen === 'register') {
-    return (
-      <RegisterScreen
-        onRegister={() => { setRole('user'); go('user-home'); }}
-        onGoLogin={() => go('login')}
-      />
-    );
-  }
-
-  if (screen === 'user-home') {
-    return (
-      <UserHomeScreen
-        onOrderPress={id => go('order-tracking', { orderId: id })}
-        onTabPress={handleTabPress}
-      />
-    );
-  }
-
-  if (screen === 'agent-home') {
-    return (
-      <AgentHomeScreen
-        onOrderPress={id => go('order-tracking', { orderId: id })}
-        onTabPress={handleTabPress}
-      />
-    );
-  }
-
-  if (screen === 'create-order') {
-    return (
-      <CreateOrderScreen
-        onSubmit={() => go('waiting')}
-        onBack={() => go('user-home')}
-      />
-    );
-  }
-
-  if (screen === 'waiting') {
-    return (
-      <WaitingScreen
-        onDone={() => go('chat')}
-        onBackHome={() => go('user-home')}
-      />
-    );
-  }
-
-  if (screen === 'user-orders' || screen === 'agent-orders') {
-    return (
-      <OrdersScreen
-        isAgent={role === 'agent'}
-        onOrderPress={id => go('order-tracking', { orderId: id })}
-        onTabPress={handleTabPress}
-      />
-    );
-  }
-
-  if (screen === 'order-tracking') {
-    return (
-      <OrderTrackingScreen
-        orderId={params?.orderId}
-        onBack={() => go(role === 'agent' ? 'agent-home' : 'user-home')}
-        onChat={() => go('chat', params)}
-      />
-    );
-  }
-
-  if (screen === 'chat') {
-    return (
-      <ChatScreen
-        orderId={params?.orderId}
-        onBack={() => go(role === 'agent' ? 'agent-home' : 'user-home')}
-      />
-    );
-  }
-
-  if (screen === 'user-profile' || screen === 'agent-profile') {
-    return (
-      <ProfileScreen
-        isAgent={role === 'agent'}
-        onBack={() => go(role === 'agent' ? 'agent-home' : 'user-home')}
-        onLogout={() => go('login')}
-      />
-    );
-  }
-
-  return null;
+  return <LoginScreen onLogin={handleLogin} />;
 };
+
+const styles = StyleSheet.create({
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+});

@@ -27,51 +27,50 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
   const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
 
   const userTabs: TabItem[] = [
-    { icon: '🏠', label: t.tab_home, route: 'home' },
-    { icon: '📦', label: t.tab_orders, route: 'orders' },
-    { icon: '💬', label: t.tab_chat, route: 'chat' },
-    { icon: '👤', label: t.tab_profile, route: 'profile' },
+    { icon: '⌂', label: t.tab_home, route: 'home' },
+    { icon: '▣', label: t.tab_orders, route: 'orders' },
+    { icon: '◉', label: t.tab_chat, route: 'chat' },
+    { icon: '◌', label: t.tab_profile, route: 'profile' },
   ];
 
-  const agentTabs: TabItem[] = [
-    { icon: '🏠', label: t.tab_home, route: 'home' },
-    { icon: '📋', label: t.tab_orders, route: 'orders' },
-    { icon: '📅', label: t.tab_calendar, route: 'calendar' },
-    { icon: '👤', label: t.tab_profile, route: 'profile' },
+  const courierTabs: TabItem[] = [
+    { icon: '⌂', label: t.tab_home, route: 'home' },
+    { icon: '▣', label: t.tab_orders, route: 'orders' },
+    { icon: '◉', label: t.tab_chat, route: 'chat' },
+    { icon: '◌', label: t.tab_profile, route: 'profile' },
   ];
 
-  const tabs = isAgent ? agentTabs : userTabs;
-  const renderedTabs = tabs;
+  const tabs = isAgent ? courierTabs : userTabs;
 
   return (
     <View style={styles.container}>
       <View style={[styles.bar, Shadow.fab]}>
-        {renderedTabs.map((tab, idx) => {
+        {tabs.map((tab, index) => {
           const isActive = activeRoute === tab.route;
           return (
             <React.Fragment key={tab.route}>
-              {idx === 2 && <View style={styles.fabPlaceholder} />}
+              {index === 2 && !isAgent ? <View style={styles.fabPlaceholder} /> : null}
               <TouchableOpacity
                 style={styles.tab}
                 onPress={() => onTabPress(tab.route)}
                 activeOpacity={0.7}
               >
                 <Text style={[styles.tabIcon, isActive && styles.tabIconActive]}>{tab.icon}</Text>
-                <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>
-                  {tab.label}
-                </Text>
-                {isActive && <View style={styles.activeIndicator} />}
+                <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>{tab.label}</Text>
+                {isActive ? <View style={styles.activeIndicator} /> : null}
               </TouchableOpacity>
             </React.Fragment>
           );
         })}
       </View>
 
-      <View style={styles.fabWrap}>
-        <TouchableOpacity style={styles.fab} activeOpacity={0.85} onPress={() => onTabPress('new-order')}>
-          <Text style={styles.fabIcon}>+</Text>
-        </TouchableOpacity>
-      </View>
+      {!isAgent ? (
+        <View style={styles.fabWrap}>
+          <TouchableOpacity style={styles.fab} activeOpacity={0.85} onPress={() => onTabPress('new-order')}>
+            <Text style={styles.fabIcon}>+</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
     </View>
   );
 };
@@ -79,7 +78,9 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
 const createStyles = (C: ThemeColors, _isRTL: boolean) => StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 0, left: 0, right: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
     alignItems: 'center',
     paddingBottom: 20,
     paddingHorizontal: 16,
@@ -108,33 +109,25 @@ const createStyles = (C: ThemeColors, _isRTL: boolean) => StyleSheet.create({
     color: C.textSecondary,
     marginTop: 2,
   },
-  tabLabelActive: {
-    color: C.primary,
-    fontFamily: Fonts.tajawal.bold,
-  },
+  tabLabelActive: { color: C.primary, fontFamily: Fonts.tajawal.bold },
   activeIndicator: {
     position: 'absolute',
     bottom: -4,
-    width: 4, height: 4, borderRadius: 2,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
     backgroundColor: C.primary,
   },
   fabPlaceholder: { width: 68 },
-  fabWrap: {
-    position: 'absolute',
-    bottom: 24,
-    alignSelf: 'center',
-  },
+  fabWrap: { position: 'absolute', bottom: 24, alignSelf: 'center' },
   fab: {
-    width: 58, height: 58, borderRadius: 29,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
     backgroundColor: C.primary,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadow.fab,
   },
-  fabIcon: {
-    color: '#FFFFFF',
-    fontSize: 28,
-    fontWeight: '300',
-    lineHeight: 32,
-  },
+  fabIcon: { color: '#FFFFFF', fontSize: 28, fontWeight: '300', lineHeight: 32 },
 });
