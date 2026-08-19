@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import {
@@ -19,9 +20,25 @@ import {
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import { LanguageProvider } from './src/context/LanguageContext';
+import { AuthProvider } from './src/auth/AuthProvider';
+import { AuthCacheBoundary } from './src/auth/AuthCacheBoundary';
 
 // Keep splash screen visible while loading fonts
 SplashScreen.preventAutoHideAsync();
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      gcTime: 5 * 60_000,
+      retry: 1,
+      refetchOnReconnect: true,
+    },
+    mutations: {
+      retry: false,
+    },
+  },
+});
 
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
@@ -48,7 +65,13 @@ export default function App() {
   return (
     <ThemeProvider>
       <LanguageProvider>
-        <AppShell onLayout={onLayoutRootView} />
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <AuthCacheBoundary>
+              <AppShell onLayout={onLayoutRootView} />
+            </AuthCacheBoundary>
+          </AuthProvider>
+        </QueryClientProvider>
       </LanguageProvider>
     </ThemeProvider>
   );
