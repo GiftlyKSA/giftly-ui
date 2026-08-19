@@ -36,7 +36,12 @@ the integrated screens.
 
 ## Required environment variables
 
-Create a local `.env` file. It is ignored by Git and is not pushed with the app:
+Copy the committed `.env.example` to a local `.env` file. The `.env` file is ignored by
+Git and is not pushed with the app:
+
+```powershell
+Copy-Item .env.example .env
+```
 
 ```dotenv
 EXPO_PUBLIC_API_URL=http://localhost:8000
