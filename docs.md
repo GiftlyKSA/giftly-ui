@@ -36,18 +36,20 @@ the integrated screens.
 
 ## Required environment variables
 
-Copy [`.env.example`](.env.example) to `.env` and set the API origin:
-
-```powershell
-Copy-Item .env.example .env
-```
+Create a local `.env` file. It is ignored by Git and is not pushed with the app:
 
 ```dotenv
 EXPO_PUBLIC_API_URL=http://localhost:8000
+EXPO_PUBLIC_ENVIRONMENT=development
 ```
 
 `EXPO_PUBLIC_API_URL` must contain the origin only. Do not append `/api`; the client
-adds `/api/...` itself.
+adds `/api/...` itself. `EXPO_PUBLIC_ENVIRONMENT` must be either `development` or
+`production`.
+
+When both the UI variable is `development` and `POST /api/auth/send-otp` returns a valid
+six-digit `dev_otp`, the OTP screen displays that exact code for local testing. A production
+build never displays an OTP, even if a malformed or unexpected API response contains one.
 
 Use the address appropriate for the runtime:
 
@@ -89,7 +91,6 @@ Invoke-WebRequest http://localhost:8000/api/health
 ```powershell
 cd ..\giftly-ui
 npm ci
-Copy-Item .env.example .env
 npx expo start -c
 ```
 
@@ -99,7 +100,8 @@ The API origin is compiled into the Expo bundle. Restart Expo after changing `.e
 
 ### UI build
 
-- Set `EXPO_PUBLIC_API_URL` to the HTTPS production API origin in the build environment.
+- Set `EXPO_PUBLIC_API_URL` to the HTTPS production API origin and
+  `EXPO_PUBLIC_ENVIRONMENT=production` in the build environment.
 - Keep the existing app IDs in `app.json` accurate: `com.giftly.app` for iOS and
   Android.
 - The previous configuration referenced image assets that do not exist in this

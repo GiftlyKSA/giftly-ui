@@ -16,11 +16,18 @@ import { useTheme } from '../../context/ThemeContext';
 interface OTPScreenProps {
   phone: string;
   expiresIn: number;
+  developmentOtp: string | null;
   onVerify: (otp: string) => Promise<void>;
   onResend: () => Promise<void>;
 }
 
-export const OTPScreen: React.FC<OTPScreenProps> = ({ phone, expiresIn, onVerify, onResend }) => {
+export const OTPScreen: React.FC<OTPScreenProps> = ({
+  phone,
+  expiresIn,
+  developmentOtp,
+  onVerify,
+  onResend,
+}) => {
   const { C } = useTheme();
   const { t } = useLanguage();
   const styles = useMemo(() => createStyles(C), [C]);
@@ -101,6 +108,12 @@ export const OTPScreen: React.FC<OTPScreenProps> = ({ phone, expiresIn, onVerify
           <Text style={styles.title}>{t.otp_title}</Text>
           <Text style={styles.subtitle}>{t.otp_subtitle}{'\n'}<Text style={styles.phone}>{phone}</Text></Text>
           <Text style={styles.expiry}>The code expires in about {Math.ceil(expiresIn / 60)} minutes.</Text>
+          {developmentOtp ? (
+            <View style={styles.developmentOtpCard}>
+              <Text style={styles.developmentOtpLabel}>Development API OTP</Text>
+              <Text selectable style={styles.developmentOtpValue}>{developmentOtp}</Text>
+            </View>
+          ) : null}
 
           <View style={styles.otpRow}>
             {otp.map((digit, index) => (
@@ -148,6 +161,9 @@ const createStyles = (C: ThemeColors) => StyleSheet.create({
   subtitle: { fontFamily: Fonts.tajawal.regular, fontSize: FontSize.base, color: C.textSecondary, textAlign: 'center', lineHeight: 24 },
   phone: { fontFamily: Fonts.inter.bold, color: C.primary },
   expiry: { fontFamily: Fonts.tajawal.regular, fontSize: FontSize.sm, color: C.textSecondary, marginTop: Spacing.xs, marginBottom: Spacing.xl },
+  developmentOtpCard: { alignItems: 'center', backgroundColor: C.primaryLighter, borderColor: C.primaryLight, borderRadius: Radius.lg, borderWidth: 1, marginBottom: Spacing.base, paddingHorizontal: Spacing.xl, paddingVertical: Spacing.sm },
+  developmentOtpLabel: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.xs, color: C.primary },
+  developmentOtpValue: { fontFamily: Fonts.inter.bold, fontSize: FontSize.xl, color: C.black, letterSpacing: 4, marginTop: 2 },
   otpRow: { flexDirection: 'row', gap: 8, marginBottom: Spacing.base },
   otpBox: { width: 46, height: 60, borderRadius: Radius.lg, borderWidth: 2, borderColor: C.gray200, fontFamily: Fonts.inter.bold, fontSize: FontSize.xl, color: C.black, backgroundColor: C.gray100 },
   otpBoxFilled: { borderColor: C.primary, backgroundColor: C.primaryLighter },

@@ -3,6 +3,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { register, sendOtp, verifyOtp } from '../api/auth';
 import { RegistrationForm, UserProfile } from '../api/types';
 import { useAuth } from '../auth/AuthProvider';
+import { extractDevelopmentOtp } from '../config/runtime';
 import OnboardingScreen from '../screens/auth/OnboardingScreen';
 import { LoginScreen } from '../screens/auth/LoginScreen';
 import { RegisterScreen } from '../screens/auth/RegisterScreen';
@@ -42,6 +43,7 @@ interface NavState {
 interface PendingOtp {
   phone: string;
   expiresIn: number;
+  developmentOtp: string | null;
 }
 
 export const RootNavigator: React.FC = () => {
@@ -79,14 +81,22 @@ export const RootNavigator: React.FC = () => {
 
   const handleLogin = async (phone: string) => {
     const response = await sendOtp(phone);
-    setPendingOtp({ phone, expiresIn: response.expires_in });
+    setPendingOtp({
+      phone,
+      expiresIn: response.expires_in,
+      developmentOtp: extractDevelopmentOtp(process.env.EXPO_PUBLIC_ENVIRONMENT, response.dev_otp),
+    });
     go('otp');
   };
 
   const handleResend = async () => {
     if (!pendingOtp) throw new Error('Start a new sign-in request first.');
     const response = await sendOtp(pendingOtp.phone);
-    setPendingOtp(current => current ? { ...current, expiresIn: response.expires_in } : current);
+    setPendingOtp(current => current ? {
+      ...current,
+      expiresIn: response.expires_in,
+      developmentOtp: extractDevelopmentOtp(process.env.EXPO_PUBLIC_ENVIRONMENT, response.dev_otp),
+    } : current);
   };
 
   const handleOtpVerify = async (otp: string) => {
@@ -143,7 +153,7 @@ export const RootNavigator: React.FC = () => {
 
   if (nav.screen === 'onboarding') return <OnboardingScreen onFinish={() => go('login')} />;
   if (nav.screen === 'login') return <LoginScreen onLogin={handleLogin} />;
-  if (nav.screen === 'otp' && pendingOtp) return <OTPScreen phone={pendingOtp.phone} expiresIn={pendingOtp.expiresIn} onVerify={handleOtpVerify} onResend={handleResend} />;
+  if (nav.screen === 'otp' && pendingOtp) return <OTPScreen phone={pendingOtp.phone} expiresIn={pendingOtp.expiresIn} developmentOtp={pendingOtp.developmentOtp} onVerify={handleOtpVerify} onResend={handleResend} />;
   if (nav.screen === 'register' && pendingOtp && registrationToken) return <RegisterScreen phone={pendingOtp.phone} onRegister={handleRegister} onGoLogin={goLogin} />;
   if (nav.screen === 'pending-verification') return <PendingVerificationScreen onVerified={() => go('agent-home')} onLogout={async () => goLogin()} />;
   if (nav.screen === 'user-home') return <UserHomeScreen onOrderPress={orderId => go('order-tracking', { orderId })} onTabPress={handleTabPress} />;
