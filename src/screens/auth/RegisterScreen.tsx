@@ -14,10 +14,11 @@ import {
 } from 'react-native';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { getErrorMessage } from '../../api/client';
-import { RegistrationForm, UserRole } from '../../api/types';
+import { RegistrationForm } from '../../api/types';
 import { ThemeColors, Spacing, Radius, Fonts, FontSize } from '../../constants/colors';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
+import { createCustomerRegistrationForm } from '../../utils/registration';
 
 interface RegisterScreenProps {
   phone: string;
@@ -48,13 +49,9 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ phone, onRegiste
   const isRTL = lang === 'ar';
   const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
   const mounted = useRef(true);
-  const [role, setRole] = useState<UserRole>('CUSTOMER');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [dob, setDob] = useState<Date | null>(null);
-  const [city, setCity] = useState('');
-  const [nationalId, setNationalId] = useState('');
-  const [passportId, setPassportId] = useState('');
   const [showPicker, setShowPicker] = useState(false);
   const [tempDate, setTempDate] = useState(new Date(2000, 0, 1));
   const [error, setError] = useState('');
@@ -72,9 +69,6 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ phone, onRegiste
   const submit = async () => {
     const trimmedName = name.trim();
     const trimmedEmail = email.trim();
-    const trimmedCity = city.trim();
-    const trimmedNationalId = nationalId.trim();
-    const trimmedPassportId = passportId.trim();
 
     if (!trimmedName) {
       setError('Please enter your full name.');
@@ -88,27 +82,14 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ phone, onRegiste
       setError('Enter a valid email address.');
       return;
     }
-    if (role === 'COURIER' && !trimmedCity) {
-      setError('Courier registration requires a city.');
-      return;
-    }
-    if (role === 'COURIER' && !trimmedNationalId && !trimmedPassportId) {
-      setError('Courier registration requires a national ID or passport ID.');
-      return;
-    }
-
     setError('');
     setIsSubmitting(true);
     try {
-      await onRegister({
-        role,
-        full_name: trimmedName,
+      await onRegister(createCustomerRegistrationForm({
+        fullName: trimmedName,
         email: trimmedEmail || null,
         dob: dob ? toApiDate(dob) : null,
-        city: role === 'COURIER' ? trimmedCity : null,
-        national_id: role === 'COURIER' ? trimmedNationalId || null : null,
-        passport_id: role === 'COURIER' ? trimmedPassportId || null : null,
-      });
+      }));
     } catch (submissionError) {
       if (mounted.current) setError(getErrorMessage(submissionError));
     } finally {
@@ -131,22 +112,6 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ phone, onRegiste
 
           <Text style={styles.title}>{t.reg_title}</Text>
           <Text style={styles.subtitle}>{t.reg_subtitle}</Text>
-
-          <Text style={styles.label}>Account type</Text>
-          <View style={styles.roleRow}>
-            {(['CUSTOMER', 'COURIER'] as UserRole[]).map(option => (
-              <TouchableOpacity
-                key={option}
-                style={[styles.roleOption, role === option && styles.roleOptionActive]}
-                onPress={() => setRole(option)}
-                disabled={isSubmitting}
-              >
-                <Text style={[styles.roleText, role === option && styles.roleTextActive]}>
-                  {option === 'CUSTOMER' ? 'Customer' : 'Courier'}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
 
           <Field label={t.reg_name} C={C} isRTL={isRTL}>
             <TextInput
@@ -189,47 +154,6 @@ export const RegisterScreen: React.FC<RegisterScreenProps> = ({ phone, onRegiste
               <Text style={styles.calIcon}>◫</Text>
             </TouchableOpacity>
           </Field>
-
-          {role === 'COURIER' ? (
-            <>
-              <Field label="City" C={C} isRTL={isRTL}>
-                <TextInput
-                  style={styles.input}
-                  value={city}
-                  onChangeText={setCity}
-                  placeholder="e.g. Jeddah"
-                  placeholderTextColor={C.gray500}
-                  textAlign={isRTL ? 'right' : 'left'}
-                  maxLength={100}
-                  editable={!isSubmitting}
-                />
-              </Field>
-              <Field label="National ID" C={C} isRTL={isRTL}>
-                <TextInput
-                  style={styles.input}
-                  value={nationalId}
-                  onChangeText={setNationalId}
-                  placeholder="Required if no passport ID"
-                  placeholderTextColor={C.gray500}
-                  textAlign={isRTL ? 'right' : 'left'}
-                  maxLength={64}
-                  editable={!isSubmitting}
-                />
-              </Field>
-              <Field label="Passport ID" C={C} isRTL={isRTL}>
-                <TextInput
-                  style={styles.input}
-                  value={passportId}
-                  onChangeText={setPassportId}
-                  placeholder="Required if no national ID"
-                  placeholderTextColor={C.gray500}
-                  textAlign={isRTL ? 'right' : 'left'}
-                  maxLength={64}
-                  editable={!isSubmitting}
-                />
-              </Field>
-            </>
-          ) : null}
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -310,12 +234,6 @@ const createStyles = (C: ThemeColors, isRTL: boolean) => StyleSheet.create({
   backText: { fontSize: 22, color: C.primary },
   title: { fontFamily: Fonts.tajawal.extraBold, fontSize: FontSize.xxl, color: C.black, textAlign: isRTL ? 'right' : 'left', marginBottom: Spacing.xs },
   subtitle: { fontFamily: Fonts.tajawal.regular, fontSize: FontSize.base, color: C.textSecondary, textAlign: isRTL ? 'right' : 'left', marginBottom: Spacing.xl },
-  label: { fontFamily: Fonts.tajawal.bold, fontSize: FontSize.base, color: C.black, textAlign: isRTL ? 'right' : 'left', marginBottom: Spacing.xs },
-  roleRow: { flexDirection: isRTL ? 'row-reverse' : 'row', gap: Spacing.sm, marginBottom: Spacing.base },
-  roleOption: { flex: 1, borderWidth: 2, borderColor: C.gray200, borderRadius: Radius.lg, padding: Spacing.md, alignItems: 'center' },
-  roleOptionActive: { borderColor: C.primary, backgroundColor: C.primaryLighter },
-  roleText: { fontFamily: Fonts.tajawal.regular, color: C.textSecondary },
-  roleTextActive: { fontFamily: Fonts.tajawal.bold, color: C.primary },
   input: { borderWidth: 2, borderColor: C.gray200, borderRadius: Radius.lg, fontFamily: Fonts.tajawal.regular, fontSize: FontSize.base, color: C.black, paddingHorizontal: Spacing.base, paddingVertical: Spacing.md, backgroundColor: C.white },
   readOnly: { backgroundColor: C.gray100, color: C.textSecondary },
   dateBtn: { flexDirection: isRTL ? 'row-reverse' : 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 2, borderColor: C.gray200, borderRadius: Radius.lg, paddingHorizontal: Spacing.base, paddingVertical: Spacing.md, backgroundColor: C.white },
