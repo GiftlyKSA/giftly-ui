@@ -15,16 +15,11 @@ import { getErrorMessage } from '../../api/client';
 import { ThemeColors, Spacing, Radius, Fonts, FontSize } from '../../constants/colors';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
+import { normalizeSaudiMobile } from '../../utils/phone';
 
 interface LoginScreenProps {
   onLogin: (phone: string) => Promise<void>;
 }
-
-const normalizeSaudiPhone = (input: string): string | null => {
-  const digits = input.replace(/\D/g, '');
-  const local = digits.startsWith('966') ? digits.slice(3) : digits.startsWith('0') ? digits.slice(1) : digits;
-  return /^5\d{8}$/.test(local) ? `+966${local}` : null;
-};
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
   const { C } = useTheme();
@@ -41,9 +36,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
   }, []);
 
   const submit = async () => {
-    const normalized = normalizeSaudiPhone(phone);
+    const normalized = normalizeSaudiMobile(phone);
     if (!normalized) {
-      setError('Enter a valid Saudi mobile number beginning with 5.');
+      setError('Enter exactly 9 Saudi mobile digits beginning with 5.');
       return;
     }
 
@@ -75,12 +70,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
               <TextInput
                 style={styles.input}
                 value={phone}
-                onChangeText={value => setPhone(value.replace(/[^0-9]/g, '').slice(0, 12))}
+                onChangeText={value => setPhone(value.replace(/[^0-9]/g, '').slice(0, 9))}
                 placeholder="5xxxxxxxx"
                 keyboardType="phone-pad"
                 textAlign={isRTL ? 'right' : 'left'}
                 placeholderTextColor={C.gray500}
-                maxLength={12}
+                maxLength={9}
                 autoComplete="tel"
                 editable={!isSubmitting}
               />
