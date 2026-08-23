@@ -1,13 +1,15 @@
 import React, { useMemo } from 'react';
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
-import { ThemeColors, Spacing, Shadow, Fonts, FontSize } from '../constants/colors';
+import { Ionicons } from '@expo/vector-icons';
+import { ThemeColors, Shadow, Fonts, FontSize } from '../constants/colors';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 
 interface TabItem {
-  icon: string;
-  label: string;
   route: string;
+  label: string;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
+  activeIcon: React.ComponentProps<typeof Ionicons>['name'];
 }
 
 interface BottomTabBarProps {
@@ -26,21 +28,12 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
   const isRTL = lang === 'ar';
   const styles = useMemo(() => createStyles(C, isRTL), [C, isRTL]);
 
-  const userTabs: TabItem[] = [
-    { icon: '⌂', label: t.tab_home, route: 'home' },
-    { icon: '▣', label: t.tab_orders, route: 'orders' },
-    { icon: '◉', label: t.tab_chat, route: 'chat' },
-    { icon: '◌', label: t.tab_profile, route: 'profile' },
+  const tabs: TabItem[] = [
+    { route: 'home', label: t.tab_home, icon: 'home-outline', activeIcon: 'home' },
+    { route: 'orders', label: t.tab_orders, icon: 'receipt-outline', activeIcon: 'receipt' },
+    { route: 'chat', label: t.tab_chat, icon: 'chatbubble-outline', activeIcon: 'chatbubble' },
+    { route: 'profile', label: t.tab_profile, icon: 'person-outline', activeIcon: 'person' },
   ];
-
-  const courierTabs: TabItem[] = [
-    { icon: '⌂', label: t.tab_home, route: 'home' },
-    { icon: '▣', label: t.tab_orders, route: 'orders' },
-    { icon: '◉', label: t.tab_chat, route: 'chat' },
-    { icon: '◌', label: t.tab_profile, route: 'profile' },
-  ];
-
-  const tabs = isAgent ? courierTabs : userTabs;
 
   return (
     <View style={styles.container}>
@@ -49,13 +42,20 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
           const isActive = activeRoute === tab.route;
           return (
             <React.Fragment key={tab.route}>
-              {index === 2 && !isAgent ? <View style={styles.fabPlaceholder} /> : null}
+              {index === 2 && !isAgent ? <View style={styles.fabPlaceholder} testID="new-order-spacer" /> : null}
               <TouchableOpacity
                 style={styles.tab}
                 onPress={() => onTabPress(tab.route)}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={tab.label}
               >
-                <Text style={[styles.tabIcon, isActive && styles.tabIconActive]}>{tab.icon}</Text>
+                <Ionicons
+                  name={isActive ? tab.activeIcon : tab.icon}
+                  size={22}
+                  color={isActive ? C.primary : C.gray500}
+                  testID={`tab-icon-${tab.route}`}
+                />
                 <Text style={[styles.tabLabel, isActive && styles.tabLabelActive]}>{tab.label}</Text>
                 {isActive ? <View style={styles.activeIndicator} /> : null}
               </TouchableOpacity>
@@ -66,8 +66,14 @@ export const BottomTabBar: React.FC<BottomTabBarProps> = ({
 
       {!isAgent ? (
         <View style={styles.fabWrap}>
-          <TouchableOpacity style={styles.fab} activeOpacity={0.85} onPress={() => onTabPress('new-order')}>
-            <Text style={styles.fabIcon}>+</Text>
+          <TouchableOpacity
+            style={styles.fab}
+            activeOpacity={0.85}
+            onPress={() => onTabPress('new-order')}
+            accessibilityRole="button"
+            accessibilityLabel={t.create_title}
+          >
+            <Ionicons name="add" size={28} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       ) : null}
@@ -101,8 +107,6 @@ const createStyles = (C: ThemeColors, _isRTL: boolean) => StyleSheet.create({
     paddingVertical: 6,
     position: 'relative',
   },
-  tabIcon: { fontSize: 20, opacity: 0.5 },
-  tabIconActive: { opacity: 1 },
   tabLabel: {
     fontFamily: Fonts.tajawal.regular,
     fontSize: FontSize.xs,
@@ -129,5 +133,4 @@ const createStyles = (C: ThemeColors, _isRTL: boolean) => StyleSheet.create({
     justifyContent: 'center',
     ...Shadow.fab,
   },
-  fabIcon: { color: '#FFFFFF', fontSize: 28, fontWeight: '300', lineHeight: 32 },
 });
