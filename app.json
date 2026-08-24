@@ -23,7 +23,8 @@
         {
           "locationWhenInUsePermission": "Giftly uses your location to create and fulfill delivery requests."
         }
-      ]
+      ],
+      "expo-localization"
     ],
     "scheme": "giftly"
   }
